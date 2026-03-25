@@ -1,4 +1,5 @@
 const { createTimedStore, getTimedCache, setTimedCache } = require('../utils/cache');
+const { fetchJsonWithRetry } = require('../utils/http');
 
 const ratesStore = createTimedStore();
 const RATES_KEY = 'rates';
@@ -9,8 +10,7 @@ async function getExchangeRates() {
   if (cached) return cached;
 
   try {
-    const res = await fetch('https://open.er-api.com/v6/latest/USD');
-    const json = await res.json();
+    const json = await fetchJsonWithRetry('https://open.er-api.com/v6/latest/USD', {}, { label: 'Exchange rates USD' });
     if (json.result === 'success') {
       setTimedCache(ratesStore, RATES_KEY, json.rates);
       return json.rates;

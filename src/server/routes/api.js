@@ -22,6 +22,35 @@ const { fetchUndpRegionIndicator } = require('../services/undp');
 const { fetchBidProjectsByIso } = require('../services/bidProjects');
 
 const responseCache = createMemoryCache(5 * 60 * 1000);
+const INDICATOR_FETCH_CONCURRENCY = 4;
+
+async function mapSettledWithConcurrency(items, limit, mapper) {
+  const results = new Array(items.length);
+  let index = 0;
+
+  async function worker() {
+    while (index < items.length) {
+      const currentIndex = index;
+      index += 1;
+
+      try {
+        results[currentIndex] = {
+          status: 'fulfilled',
+          value: await mapper(items[currentIndex], currentIndex),
+        };
+      } catch (reason) {
+        results[currentIndex] = {
+          status: 'rejected',
+          reason,
+        };
+      }
+    }
+  }
+
+  const workerCount = Math.min(limit, items.length) || 1;
+  await Promise.all(Array.from({ length: workerCount }, () => worker()));
+  return results;
+}
 
 function getRegionFallbackRankings(indicatorKey) {
   if (indicatorKey !== 'hdi') {
@@ -86,12 +115,16 @@ function buildApiRouter() {
       const trustProvidersPromise = isRegionAggregate
         ? fetchRegionalTrustProviders()
         : fetchCountryTrustProviders(iso);
-      const [ratesResult, countryMetadataResult, hdiRegionResult, trustProvidersResult, ...indicatorRegionResults] = await Promise.allSettled([
+      const [ratesResult, countryMetadataResult, hdiRegionResult, trustProvidersResult] = await Promise.allSettled([
         getExchangeRates(),
         isRegionAggregate ? Promise.resolve({ incomeLevel: null }) : fetchWorldBankCountryMetadata(iso),
         fetchUndpRegionIndicator('hdi', getRegionFallbackRankings),
         trustProvidersPromise,
-        ...entries.map(([, def]) => {
+      ]);
+      const indicatorRegionResults = await mapSettledWithConcurrency(
+        entries,
+        INDICATOR_FETCH_CONCURRENCY,
+        async ([, def]) => {
           if (def.databaseId) {
             return fetchData360RegionIndicator(
               def.databaseId,
@@ -101,8 +134,8 @@ function buildApiRouter() {
             );
           }
           return fetchWorldBankRegionIndicator(def.code);
-        }),
-      ]);
+        }
+      );
 
       const rates = ratesResult.status === 'fulfilled' ? ratesResult.value : {};
       const countryMetadata = countryMetadataResult.status === 'fulfilled'
@@ -119,6 +152,9 @@ function buildApiRouter() {
       const regionDataByKey = {};
       entries.forEach(([key], index) => {
         const result = indicatorRegionResults[index];
+        if (result.status === 'rejected') {
+          console.warn(`No se pudo obtener el indicador ${key}: ${result.reason?.message || result.reason}`);
+        }
         regionDataByKey[key] = result.status === 'fulfilled'
           ? result.value
           : { byIso: {}, rankMap: {} };

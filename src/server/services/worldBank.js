@@ -1,4 +1,5 @@
 const { createTimedStore, getTimedCache, setTimedCache } = require('../utils/cache');
+const { fetchJsonWithRetry } = require('../utils/http');
 const { REGION_ISO_CODES, WORLD_BANK_REGION_COUNTRY_PATH } = require('../data/countries');
 const { buildIndicatorRanking } = require('../domain/rankings');
 
@@ -25,8 +26,7 @@ async function fetchWorldBankCountryMetadata(isoCode) {
 
   try {
     const url = `https://api.worldbank.org/v2/country/${isoCode}?format=json`;
-    const res = await fetch(url);
-    const json = await res.json();
+    const json = await fetchJsonWithRetry(url, {}, { label: `World Bank country metadata ${isoCode}` });
     const entry = Array.isArray(json) && Array.isArray(json[1]) ? json[1][0] : null;
     const metadata = {
       incomeLevel: translateWorldBankIncomeLevel(entry?.incomeLevel?.value),
@@ -41,8 +41,7 @@ async function fetchWorldBankCountryMetadata(isoCode) {
 
 async function fetchIndicator(isoCode, indicatorCode) {
   const url = `https://api.worldbank.org/v2/country/${isoCode}/indicator/${indicatorCode}?format=json&mrv=1`;
-  const res = await fetch(url);
-  const json = await res.json();
+  const json = await fetchJsonWithRetry(url, {}, { label: `World Bank indicator ${indicatorCode} for ${isoCode}` });
   if (!Array.isArray(json) || json.length < 2 || !json[1] || !json[1][0]) {
     return { value: null, date: null };
   }
@@ -56,8 +55,7 @@ async function fetchWorldBankRegionIndicator(indicatorCode) {
   if (cached) return cached;
 
   const url = `https://api.worldbank.org/v2/country/${WORLD_BANK_REGION_COUNTRY_PATH}/indicator/${indicatorCode}?format=json&mrv=5&per_page=500`;
-  const res = await fetch(url);
-  const json = await res.json();
+  const json = await fetchJsonWithRetry(url, {}, { label: `World Bank regional indicator ${indicatorCode}` });
   const rows = Array.isArray(json) && Array.isArray(json[1]) ? json[1] : [];
   const byIso = Object.fromEntries(
     REGION_ISO_CODES.map((iso) => [iso, { value: null, date: null, source: 'Banco Mundial' }])

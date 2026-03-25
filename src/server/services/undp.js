@@ -1,4 +1,5 @@
 const { createTimedStore, getTimedCache, setTimedCache } = require('../utils/cache');
+const { fetchJsonWithRetry } = require('../utils/http');
 const config = require('../config');
 const { REGION_ISO_CODES, UNDP_REGION_COUNTRY_LIST } = require('../data/countries');
 const { buildIndicatorRanking, toFiniteNumber } = require('../domain/rankings');
@@ -36,13 +37,7 @@ async function fetchUndpRegionIndicator(indicatorCode, getFallbackRankings) {
     url.searchParams.set('indicator', indicatorCode.toLowerCase());
 
     try {
-      const res = await fetch(url);
-      if (!res.ok) {
-        console.error(`Error PNUD ${indicatorCode} ${year}: HTTP ${res.status}`);
-        continue;
-      }
-
-      const rows = await res.json();
+      const rows = await fetchJsonWithRetry(url, {}, { label: `PNUD ${indicatorCode} ${year}` });
       if (!Array.isArray(rows)) continue;
 
       for (const row of rows) {

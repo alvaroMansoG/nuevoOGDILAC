@@ -1,4 +1,5 @@
 const { createTimedStore, getTimedCache, setTimedCache } = require('../utils/cache');
+const { fetchJsonWithRetry } = require('../utils/http');
 const { REGION_ISO_CODES } = require('../data/countries');
 const { buildIndicatorRanking, toFiniteNumber } = require('../domain/rankings');
 
@@ -11,7 +12,7 @@ async function fetchData360RegionIndicator(databaseId, indicatorId, fallbackFetc
   if (cached) return cached;
 
   try {
-    const res = await fetch('https://data360api.worldbank.org/data360/data', {
+    const json = await fetchJsonWithRetry('https://data360api.worldbank.org/data360/data', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
@@ -20,13 +21,9 @@ async function fetchData360RegionIndicator(databaseId, indicatorId, fallbackFetc
         ref_area: REGION_ISO_CODES,
         isLatestData: true,
       }),
+    }, {
+      label: `Data360 ${databaseId}/${indicatorId}`,
     });
-
-    if (!res.ok) {
-      throw new Error(`HTTP ${res.status}`);
-    }
-
-    const json = await res.json();
     const rows = Array.isArray(json?.value) ? json.value : [];
     const byIso = Object.fromEntries(
       REGION_ISO_CODES.map((iso) => [iso, { value: null, date: null, source: sourceLabel }])
