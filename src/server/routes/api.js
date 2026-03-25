@@ -17,6 +17,7 @@ const { createMemoryCache } = require('../utils/cache');
 const { getExchangeRates } = require('../services/exchangeRates');
 const { fetchWorldBankCountryMetadata, fetchWorldBankRegionIndicator } = require('../services/worldBank');
 const { fetchData360RegionIndicator } = require('../services/data360');
+const { fetchCountryTrustProviders, fetchRegionalTrustProviders } = require('../services/trustProviders');
 const { fetchUndpRegionIndicator } = require('../services/undp');
 
 const responseCache = createMemoryCache(5 * 60 * 1000);
@@ -63,10 +64,14 @@ function buildApiRouter() {
 
     try {
       const entries = Object.entries(INDICATORS).filter(([key]) => key !== 'hdi');
-      const [ratesResult, countryMetadataResult, hdiRegionResult, ...indicatorRegionResults] = await Promise.allSettled([
+      const trustProvidersPromise = isRegionAggregate
+        ? fetchRegionalTrustProviders()
+        : fetchCountryTrustProviders(iso);
+      const [ratesResult, countryMetadataResult, hdiRegionResult, trustProvidersResult, ...indicatorRegionResults] = await Promise.allSettled([
         getExchangeRates(),
         isRegionAggregate ? Promise.resolve({ incomeLevel: null }) : fetchWorldBankCountryMetadata(iso),
         fetchUndpRegionIndicator('hdi', getRegionFallbackRankings),
+        trustProvidersPromise,
         ...entries.map(([, def]) => {
           if (def.databaseId) {
             return fetchData360RegionIndicator(
@@ -89,6 +94,9 @@ function buildApiRouter() {
       const hdiRegionData = hdiRegionResult.status === 'fulfilled'
         ? hdiRegionResult.value
         : getRegionFallbackRankings('hdi');
+      const trustProviders = trustProvidersResult.status === 'fulfilled'
+        ? trustProvidersResult.value
+        : { count: 0, providers: [], sourceUrl: null, listUrl: null };
       const regionDataByKey = {};
       entries.forEach(([key], index) => {
         const result = indicatorRegionResults[index];
@@ -112,6 +120,7 @@ function buildApiRouter() {
             hdiRegionData,
           }),
           govData: buildRegionalGovData(),
+          trustProviders,
         };
 
         responseCache.set(iso, data);
@@ -163,6 +172,7 @@ function buildApiRouter() {
 
       data.govData = buildCountryGovData(iso);
       data.digitalEnablers = buildCountryDigitalEnablers(iso);
+      data.trustProviders = trustProviders;
 
       responseCache.set(iso, data);
       res.json(data);

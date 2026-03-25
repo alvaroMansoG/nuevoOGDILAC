@@ -752,6 +752,8 @@ html {
 #connectivity-section,
 #findex-section,
 #enablers-section,
+#trust-section,
+#digital-guides-section,
 #gov-section {
   scroll-margin-top: 1rem;
 }
@@ -807,6 +809,191 @@ html {
   display: flex;
   flex-direction: column;
   gap: .85rem;
+}
+
+.digital-guides-section {
+  padding: 0;
+  overflow: hidden;
+}
+
+.digital-guides-section .section-header {
+  margin-bottom: 0;
+  padding: 1rem 1.1rem;
+}
+
+.trust-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.trust-summary-count {
+  display: inline-flex;
+  align-items: baseline;
+  gap: .45rem;
+  flex-wrap: wrap;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.trust-summary-meta {
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.trust-summary-link {
+  display: inline-flex;
+  align-items: center;
+  gap: .25rem;
+  font-size: .84rem;
+  font-weight: 700;
+  color: var(--bid-azul);
+}
+
+.trust-providers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.trust-provider-card {
+  display: flex;
+  flex-direction: column;
+  gap: .8rem;
+  min-height: 178px;
+  padding: 1rem 1rem 1.1rem;
+  border: 1px solid rgba(0,78,112,.1);
+  border-left: 4px solid rgba(0,78,112,.78);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(247,250,252,.96), rgba(243,247,252,.9));
+  box-shadow: 0 8px 18px rgba(0,78,112,.05);
+}
+
+.trust-provider-country {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  align-self: flex-start;
+  padding: .28rem .6rem;
+  border-radius: 999px;
+  background: rgba(0,78,112,.08);
+  color: var(--bid-azul);
+  font-size: .72rem;
+  font-weight: 700;
+}
+
+.trust-provider-country-flag {
+  line-height: 1;
+}
+
+.trust-provider-name {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.25;
+  color: var(--text-primary);
+}
+
+.trust-provider-services {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+}
+
+.trust-service-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.6rem;
+  padding: .2rem .55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(0,78,112,.18);
+  background: #fff;
+  color: var(--bid-azul);
+  font-size: .7rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.trust-service-pill-muted {
+  color: var(--text-muted);
+  border-color: rgba(107,133,153,.24);
+}
+
+.trust-provider-link {
+  display: inline-flex;
+  align-items: center;
+  margin-top: auto;
+  font-size: .84rem;
+  font-weight: 700;
+}
+
+.trust-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: .85rem;
+  padding: 1.4rem;
+  border: 1px dashed rgba(0,78,112,.2);
+  border-radius: 16px;
+  background: rgba(247,250,252,.82);
+}
+
+.trust-empty-title {
+  margin: 0;
+  font-size: .92rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.digital-guides-title-row {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+}
+
+.digital-guides-title-icon {
+  width: 1.35rem;
+  height: 1.35rem;
+  color: #314966;
+  flex-shrink: 0;
+}
+
+.digital-guides-title-icon svg,
+.digital-guides-empty-icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.digital-guides-empty {
+  min-height: 208px;
+  padding: 4.1rem 1.5rem 4.35rem;
+  border-top: 1px solid rgba(0,78,112,.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .85rem;
+  text-align: center;
+}
+
+.digital-guides-empty-icon {
+  width: 2.7rem;
+  height: 2.7rem;
+  color: #a7adb5;
+}
+
+.digital-guides-empty-text {
+  margin: 0;
+  max-width: 52rem;
+  color: #a7adb5;
+  font-size: .95rem;
+  font-weight: 500;
 }
 
 .enabler-dimension-card {
@@ -1533,6 +1720,12 @@ html {
   }
   .card-value { font-size: 1.95rem; }
   #basic-section .card-main-copy .card-value { font-size: 1.8rem; }
+  .trust-summary {
+    align-items: flex-start;
+  }
+  .trust-providers-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ════════════════════════════════════════

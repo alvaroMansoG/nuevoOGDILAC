@@ -42,6 +42,10 @@ const connectivityLinks = $('#connectivity-links');
 const findexLinks       = $('#findex-links');
 const digitalEnablersEl = $('#digital-enablers');
 const enablersSection   = $('#enablers-section');
+const trustSection      = $('#trust-section');
+const trustSummary      = $('#trust-summary');
+const trustProvidersEl  = $('#trust-providers');
+const trustLinks        = $('#trust-links');
 const basicMethodNote   = $('#basic-method-note');
 const connectivityMethodNote = $('#connectivity-method-note');
 const findexMethodNote  = $('#findex-method-note');
@@ -68,6 +72,8 @@ let sectionCollapseState = {
   connectivity: false,
   findex: false,
   enablers: false,
+  trust: false,
+  guides: false,
   gov: false,
 };
 let enablerDimensionCollapseState = {};
@@ -77,6 +83,8 @@ const COLLAPSIBLE_SECTION_IDS = {
   connectivity: 'connectivity-section',
   findex: 'findex-section',
   enablers: 'enablers-section',
+  trust: 'trust-section',
+  guides: 'digital-guides-section',
   gov: 'gov-section',
 };
 
@@ -445,6 +453,10 @@ function escapeHtmlAttr(value) {
     .replace(/"/g, '&quot;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
+}
+
+function escapeHtml(value) {
+  return escapeHtmlAttr(value).replace(/'/g, '&#39;');
 }
 
 function getRadarAbbreviatedLabel(indexKey, label, index) {
@@ -1183,6 +1195,97 @@ function renderDigitalEnablers(data) {
   });
 }
 
+function formatTrustProviderCount(count) {
+  const safeCount = Number.isFinite(Number(count)) ? Number(count) : 0;
+  return `${formatLocaleNumber(safeCount, 0)} ${safeCount === 1 ? 'proveedor' : 'proveedores'}`;
+}
+
+function renderTrustProviders(data) {
+  if (!trustSection || !trustSummary || !trustProvidersEl || !trustLinks) return;
+
+  const navLink = document.querySelector('.banner-section-link[data-section-key="trust"]');
+  const isRegionAggregate = Boolean(data.country?.isRegionAggregate);
+  const trustData = data.trustProviders || {};
+  const providers = Array.isArray(trustData.providers) ? trustData.providers : [];
+  const count = Number.isFinite(Number(trustData.count)) ? Number(trustData.count) : providers.length;
+  const countriesWithProviders = Number.isFinite(Number(trustData.countriesWithProviders))
+    ? Number(trustData.countriesWithProviders)
+    : 0;
+  const listUrl = trustData.listUrl || trustData.sourceUrl || '';
+  const sourceUrl = trustData.sourceUrl || listUrl || '';
+
+  trustSection.style.display = 'block';
+  if (navLink) navLink.classList.remove('hidden');
+
+  trustSummary.innerHTML = `
+    <span class="trust-summary-count">
+      ${escapeHtml(formatTrustProviderCount(count))}
+      ${isRegionAggregate && countriesWithProviders
+        ? `<span class="trust-summary-meta">en ${escapeHtml(formatLocaleNumber(countriesWithProviders, 0))} ${countriesWithProviders === 1 ? 'país' : 'países'}</span>`
+        : ''
+      }
+    </span>
+    ${listUrl
+      ? `<a class="trust-summary-link" href="${escapeHtmlAttr(listUrl)}" target="_blank" rel="noopener noreferrer">Ver lista completa</a>`
+      : ''
+    }
+  `;
+
+  if (providers.length) {
+    trustProvidersEl.innerHTML = providers.map((provider) => {
+      const services = Array.isArray(provider.services) ? provider.services.filter((service) => service?.name) : [];
+      const providerUrl = provider.detailUrl || listUrl || sourceUrl || '';
+      const countryBadge = isRegionAggregate
+        ? `
+          <div class="trust-provider-country">
+            <span class="trust-provider-country-flag" aria-hidden="true">${escapeHtml(provider.countryFlag || getFlagEmoji(provider.countryIso3 || ''))}</span>
+            <span class="trust-provider-country-name">${escapeHtml(fixText(provider.countryName || provider.countryIso3 || ''))}</span>
+          </div>
+        `
+        : '';
+
+      return `
+        <article class="trust-provider-card">
+          ${countryBadge}
+          <h4 class="trust-provider-name">${escapeHtml(fixText(provider.name || 'Proveedor sin nombre'))}</h4>
+          <div class="trust-provider-services">
+            ${services.length
+              ? services.map((service) => `
+                <span class="trust-service-pill">${escapeHtml(fixText(service.name))}</span>
+              `).join('')
+              : '<span class="trust-service-pill trust-service-pill-muted">Sin servicios especificados</span>'
+            }
+          </div>
+          ${providerUrl
+            ? `<a class="trust-provider-link" href="${escapeHtmlAttr(providerUrl)}" target="_blank" rel="noopener noreferrer">Ver servicios</a>`
+            : ''
+          }
+        </article>
+      `;
+    }).join('');
+  } else {
+    trustProvidersEl.innerHTML = `
+      <div class="trust-empty-state">
+        <p class="trust-empty-title">${isRegionAggregate
+          ? 'No hay proveedores de servicios de confianza registrados para este agregado regional.'
+          : 'No hay proveedores de servicios de confianza registrados para este país.'
+        }</p>
+        ${sourceUrl
+          ? `<a class="trust-summary-link" href="${escapeHtmlAttr(sourceUrl)}" target="_blank" rel="noopener noreferrer">Ver todas las listas de confianza</a>`
+          : ''
+        }
+      </div>
+    `;
+  }
+
+  trustLinks.innerHTML = sourceUrl
+    ? `
+      <span>Fuente:</span>
+      <a href="${escapeHtmlAttr(sourceUrl)}" target="_blank" rel="noopener noreferrer">Red GEALC</a>
+    `
+    : '';
+}
+
 // â”€â”€â”€ Render indicators â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // â”€â”€â”€ Render indicators â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderIndicators(data) {
@@ -1284,6 +1387,7 @@ function renderIndicators(data) {
   }
 
   renderDigitalEnablers(data);
+  renderTrustProviders(data);
 }
 
 // â”€â”€â”€ Radar chart instance (shared) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
