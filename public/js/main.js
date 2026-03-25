@@ -202,12 +202,12 @@ const INDICATOR_TOOLTIPS = {
 INDICATOR_TOOLTIPS['SI.POV.GINI'] = 'Mide cu\u00E1nto se desv\u00EDa la distribuci\u00F3n del ingreso o del consumo de la igualdad perfecta. Un valor de 0 representa igualdad total y 100 desigualdad total. Para el agregado ALC se muestra un promedio simple de \u00EDndices nacionales; no equivale al Gini regional real.';
 
 const GOV_INDEX_META = {
-  egdi: { org: 'NACIONES UNIDAS', name: 'E-Government Development Index (EGDI)', scaleMax: 1, hasDimensions: true },
-  gtmi: { org: 'BANCO MUNDIAL', name: 'GovTech Maturity Index (GTMI)', scaleMax: 1, hasDimensions: true },
-  gci: { org: 'ITU', name: 'Global Cybersecurity Index (GCI)', scaleMax: 100, hasDimensions: true },
-  ocde: { org: 'OCDE / BID', name: 'Digital Government Index', scaleMax: 1, hasDimensions: true },
-  ai: { org: 'OXFORD INSIGHTS', name: 'Government AI Readiness Index', scaleMax: 100, hasDimensions: true },
-  nri: { org: 'PORTULANS', name: 'Network Readiness Index (NRI)', scaleMax: 100, hasDimensions: true },
+  egdi: { org: 'NACIONES UNIDAS', name: 'Índice de Gobierno Digital (EGDI)', shortName: 'eGOV', scaleMax: 1, hasDimensions: true },
+  gtmi: { org: 'BANCO MUNDIAL', name: 'Índice de Madurez GovTech (GTMI)', shortName: 'GovTech', scaleMax: 1, hasDimensions: true },
+  gci: { org: 'ITU', name: 'Índice global de ciberseguridad (GCI)', shortName: 'Ciberseguridad', scaleMax: 100, hasDimensions: true },
+  ocde: { org: 'OCDE/BID', name: 'Índice de Gobierno Digital de America Latina y el Caribe', shortName: 'Gobierno Digital', scaleMax: 1, hasDimensions: true },
+  ai: { org: 'OXFORD INSIGHTS', name: 'Índice de Madurez IA (AI Readiness)', shortName: 'Madurez IA', scaleMax: 100, hasDimensions: true },
+  nri: { org: 'PORTULANS', name: 'Índice de Preparación de la Red (NRI)', shortName: 'Preparación Red', scaleMax: 100, hasDimensions: true },
 };
 
 function getGovSubindexScaleMax(indexKey) {
@@ -220,7 +220,7 @@ function getGovRadarNormalizationNote() {
 }
 
 function getGovHistoryNormalizationNote() {
-  return 'Cada línea muestra la evolución histórica del índice normalizada sobre su escala teórica máxima. Los huecos indican años sin dato comparable o no disponible.';
+  return 'Serie 2020-2026 normalizada por escala teórica máxima. Cada línea empieza en su primer año con dato; los huecos intermedios se interpolan y desde el último dato la serie continúa plana.';
 }
 
 function getGovOverviewTitle() {
@@ -235,6 +235,69 @@ const GOV_OVERVIEW_COLORS = {
   ai: '#e08b2c',
   nri: '#2f7aa3',
 };
+
+function clamp01(value) {
+  return Math.max(0, Math.min(1, value));
+}
+
+function buildInterpolatedGovHistorySeries(indexKey, indexData, startYear, endYear) {
+  const scaleMax = GOV_INDEX_META[indexKey].scaleMax;
+  const observedPoints = (indexData?.availableYears || [])
+    .map((year) => Number(year))
+    .filter((year) => year >= startYear && year <= endYear)
+    .map((year) => {
+      const entry = getGovSeriesEntry(indexData, String(year));
+      return entry?.score != null ? { year, score: entry.score, normalized: entry.score / scaleMax } : null;
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.year - b.year);
+
+  if (!observedPoints.length) {
+    return null;
+  }
+
+  const observedSet = new Set(observedPoints.map((point) => point.year));
+  const years = Array.from({ length: endYear - startYear + 1 }, (_, index) => startYear + index);
+
+  let values;
+  if (observedPoints.length === 1) {
+    values = years.map((year) => {
+      if (year < observedPoints[0].year) return null;
+      return clamp01(observedPoints[0].normalized);
+    });
+  } else {
+    values = years.map((year) => {
+      const exactPoint = observedPoints.find((point) => point.year === year);
+      if (exactPoint) return clamp01(exactPoint.normalized);
+
+      if (year < observedPoints[0].year) {
+        return null;
+      }
+
+      const last = observedPoints[observedPoints.length - 1];
+      if (year > last.year) {
+        return clamp01(last.normalized);
+      }
+
+      for (let index = 0; index < observedPoints.length - 1; index += 1) {
+        const left = observedPoints[index];
+        const right = observedPoints[index + 1];
+        if (year > left.year && year < right.year) {
+          const ratio = (year - left.year) / (right.year - left.year);
+          return clamp01(left.normalized + (right.normalized - left.normalized) * ratio);
+        }
+      }
+
+      return null;
+    });
+  }
+
+  return {
+    years,
+    values,
+    observedSet,
+  };
+}
 
 function getDimensionScaleNote(indexKey) {
   const notes = {
@@ -1125,8 +1188,9 @@ function buildPositionBar(scores, currentIso, countryName, alcAvg, allNames, isC
     if (val == null || iso === currentIso) continue;
     const pct = ((val - min) / range) * 100;
     const hoverName = allNames && allNames[iso] ? allNames[iso] : iso;
+    const edgeClass = pct < 8 ? 'edge-left' : (pct > 92 ? 'edge-right' : '');
     markersHtml += `
-      <div class="gov-marker" style="left:${pct.toFixed(2)}%">
+      <div class="gov-marker ${edgeClass}" style="left:${pct.toFixed(2)}%">
         <div class="gov-marker-label">${hoverName} <span style="font-weight:700;margin-left:4px">${fmt(val)}</span></div>
       </div>
     `;
@@ -1135,8 +1199,9 @@ function buildPositionBar(scores, currentIso, countryName, alcAvg, allNames, isC
   // 2. Draw ALC Average marker if available
   if (alcAvg != null) {
     const alcPct = ((alcAvg - min) / range) * 100;
+    const edgeClass = alcPct < 8 ? 'edge-left' : (alcPct > 92 ? 'edge-right' : '');
     markersHtml += `
-      <div class="gov-marker alc-avg" style="left:${alcPct.toFixed(2)}%">
+      <div class="gov-marker alc-avg ${edgeClass}" style="left:${alcPct.toFixed(2)}%">
         <div class="gov-marker-label">ALC Media <span style="font-weight:700;margin-left:4px">${fmt(alcAvg)}</span></div>
       </div>
     `;
@@ -1148,8 +1213,9 @@ function buildPositionBar(scores, currentIso, countryName, alcAvg, allNames, isC
   if (current != null) {
     const currentPct = ((current - min) / range) * 100;
     const lbl = countryName.split(' ')[0] + (countryName.includes('Rep\u00FAblica') ? ' Dom.' : '');
+    const edgeClass = currentPct < 8 ? 'edge-left' : (currentPct > 92 ? 'edge-right' : '');
     markersHtml += `
-      <div class="gov-marker active-country" style="left:${currentPct.toFixed(2)}%">
+      <div class="gov-marker active-country ${edgeClass}" style="left:${currentPct.toFixed(2)}%">
         <div class="gov-marker-label">${lbl}: <span style="font-weight:700;margin-left:4px">${fmt(current)}</span></div>
       </div>
     `;
@@ -1158,7 +1224,7 @@ function buildPositionBar(scores, currentIso, countryName, alcAvg, allNames, isC
   const div = document.createElement('div');
   div.className = 'gov-posbar-wrap';
   div.innerHTML = `
-    <div class="gov-posbar-label">Posici\u00F3n relativa en ALC (${numCountries} pa\u00EDses)</div>
+    <div class="gov-posbar-label">Posici\u00F3n relativa en la regi\u00F3n (${numCountries} pa\u00EDses)</div>
     <div class="gov-posbar-track">
       ${markersHtml}
     </div>
@@ -1274,10 +1340,7 @@ function formatGovRank(rank, withMedal = false) {
 
 
 function getGovIndexDisplayName(indexKey) {
-  if (indexKey === 'ocde') return 'OCDE / BID';
-  if (indexKey === 'ai') return 'AI Readiness';
-  if (indexKey === 'nri') return 'NRI';
-  return indexKey.toUpperCase();
+  return GOV_INDEX_META[indexKey]?.shortName || indexKey.toUpperCase();
 }
 
 function getCurrentGovYear(indexKey, indexData) {
@@ -1302,12 +1365,27 @@ function formatGovScore(indexKey, score) {
   return formatLocaleNumber(score, digits, false);
 }
 
-function getGovHeaderRows(indexKey, entry) {
+function getGovHeaderRows(indexKey, entry, isRegionAggregate = false) {
   const rankWorldText = formatGovRank(entry?.rankWorld, false);
   const rankAlcText = formatGovRank(entry?.rankALC, true);
   const rawGroupValue = entry?.tierLabel || entry?.group;
   const groupMeta = getGovGroupMeta(indexKey, rawGroupValue);
   const groupValue = groupMeta?.label || getGovGroupLabel(indexKey, rawGroupValue);
+
+  if (isRegionAggregate) {
+    const rows = [];
+    if (rawGroupValue != null || groupMeta) {
+      rows.push({
+        label: 'Grupo',
+        value: groupValue,
+        kind: 'group',
+        tooltip: groupMeta?.tooltip || getGovGroupTooltip(indexKey, rawGroupValue),
+        color: groupMeta?.color || '',
+        icon: groupMeta?.icon || '',
+      });
+    }
+    return rows;
+  }
 
   if (indexKey === 'ocde') {
     return [
@@ -1354,13 +1432,19 @@ function buildGovCard({ indexKey, indexData, countryName, countryIso, allAlcName
   const currentYear = getCurrentGovYear(indexKey, indexData);
   const entry = getGovSeriesEntry(indexData, currentYear);
   const govTooltip = getGovMethodTooltip(indexKey, countryIso, currentYear);
+  const isRegionAggregate = countryIso === REGION_AGGREGATE_ISO;
   const diffValue = entry?.diffVsAlc;
   const diffClass = diffValue >= 0 ? 'gov-diff-positive' : 'gov-diff-negative';
   const diffText = diffValue != null
     ? `${diffValue >= 0 ? '+' : '-'}${formatLocaleNumber(Math.abs(diffValue), 2, false)}`
     : '\u2014';
+  const sampleSize = Object.values(entry?.allAlc || {}).filter((value) => Number.isFinite(value)).length;
+  const scoreMetaLabel = isRegionAggregate
+    ? `Puntuación media${sampleSize ? ` (${sampleSize} países)` : ''}`
+    : 'Dif. vs media ALC';
+  const scoreMetaValue = isRegionAggregate ? '' : diffText;
   const scoreDisplay = formatGovScore(indexKey, entry?.score);
-  const headerRows = getGovHeaderRows(indexKey, entry);
+  const headerRows = getGovHeaderRows(indexKey, entry, isRegionAggregate);
   const orgBadge = getGovOrgBadge(indexKey, meta.org);
 
   const card = document.createElement('div');
@@ -1399,8 +1483,8 @@ function buildGovCard({ indexKey, indexData, countryName, countryIso, allAlcName
       <div class="gov-card-score-panel" title="${escapeHtmlAttr(govTooltip)}" aria-label="${escapeHtmlAttr(govTooltip)}">
         <div class="gov-card-score-value ${indexKey}">${scoreDisplay}</div>
         <div class="gov-card-score-diff">
-          <span class="gov-card-score-diff-label">Dif. vs media ALC</span>
-          <span class="${diffClass}">${diffText}</span>
+          <span class="gov-card-score-diff-label">${scoreMetaLabel}</span>
+          ${scoreMetaValue ? `<span class="${diffClass}">${scoreMetaValue}</span>` : ''}
         </div>
       </div>
     </div>
@@ -1418,21 +1502,29 @@ function buildGovCard({ indexKey, indexData, countryName, countryIso, allAlcName
   return card;
 }
 
-function updateGovRadarChart(govData, countryName) {
+function updateGovComparisonChart(govData, countryName, isRegionAggregate = false) {
   if (govRadarNote) {
     govRadarNote.textContent = getGovRadarNormalizationNote();
   }
-  const labels = ['EGDI', 'GCI', 'GTMI', 'OCDE/BID', 'AI Readiness', 'NRI'];
-  const countryValues = ['egdi', 'gci', 'gtmi', 'ocde', 'ai', 'nri'].map((indexKey) => {
-    const entry = getGovSeriesEntry(govData[indexKey], getCurrentGovYear(indexKey, govData[indexKey]));
+  if (govChartTitle) {
+    govChartTitle.textContent = getGovOverviewTitle();
+  }
+  const comparisonSeries = ['egdi', 'gci', 'gtmi', 'ocde', 'ai', 'nri'].map((indexKey) => {
+    const year = getCurrentGovYear(indexKey, govData[indexKey]);
+    const entry = getGovSeriesEntry(govData[indexKey], year);
     const scaleMax = GOV_INDEX_META[indexKey].scaleMax;
-    return entry?.score != null ? entry.score / scaleMax : 0;
+    return {
+      indexKey,
+      year,
+      label: getGovIndexDisplayName(indexKey),
+      chartLabel: [getGovIndexDisplayName(indexKey), year ? String(year) : ''],
+      countryValue: entry?.score != null ? entry.score / scaleMax : 0,
+      alcValue: entry?.alcAvg != null ? entry.alcAvg / scaleMax : 0,
+    };
   });
-  const alcValues = ['egdi', 'gci', 'gtmi', 'ocde', 'ai', 'nri'].map((indexKey) => {
-    const entry = getGovSeriesEntry(govData[indexKey], getCurrentGovYear(indexKey, govData[indexKey]));
-    const scaleMax = GOV_INDEX_META[indexKey].scaleMax;
-    return entry?.alcAvg != null ? entry.alcAvg / scaleMax : 0;
-  });
+  const labels = comparisonSeries.map((item) => item.chartLabel);
+  const countryValues = comparisonSeries.map((item) => item.countryValue);
+    const alcValues = comparisonSeries.map((item) => item.alcValue);
 
   const radarCtx = document.getElementById('govRadarChart')?.getContext('2d');
   if (!radarCtx) return;
@@ -1445,46 +1537,171 @@ function updateGovRadarChart(govData, countryName) {
     type: 'radar',
     data: {
       labels,
-      datasets: [
-        {
-          label: countryName,
-          data: countryValues,
-          backgroundColor: 'rgba(25, 104, 188, 0.18)',
-          borderColor: '#1968bc',
-          pointBackgroundColor: '#1968bc',
-          pointRadius: 5,
-          borderWidth: 2,
-        },
-        {
-          label: 'Media ALC',
-          data: alcValues,
-          backgroundColor: 'rgba(230, 126, 34, 0.10)',
-          borderColor: '#e67e22',
-          pointBackgroundColor: '#e67e22',
-          pointRadius: 4,
-          borderWidth: 2,
-          borderDash: [6, 4],
-        },
-      ],
+        datasets: [
+          {
+            label: countryName,
+            data: countryValues,
+            backgroundColor: 'rgba(25, 104, 188, 0.18)',
+            borderColor: '#1968bc',
+            pointBackgroundColor: '#1968bc',
+            pointRadius: 5,
+            borderWidth: 2,
+          },
+          ...(!isRegionAggregate ? [{
+            label: 'Media ALC',
+            data: alcValues,
+            backgroundColor: 'rgba(230, 126, 34, 0.10)',
+            borderColor: '#e67e22',
+            pointBackgroundColor: '#e67e22',
+            pointRadius: 4,
+            borderWidth: 2,
+            borderDash: [6, 4],
+          }] : []),
+        ],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      layout: {
+        padding: { top: 8, right: 12, bottom: 28, left: 12 },
+      },
       scales: {
         r: {
           min: 0,
           max: 1,
           ticks: { stepSize: 0.25, color: '#6b8599', font: { size: 10, weight: '500' }, backdropColor: 'transparent' },
-          pointLabels: { font: { size: 13, weight: '700' }, color: '#1a2b3c' },
+          pointLabels: { font: { size: 12, weight: '700' }, color: '#1a2b3c' },
           grid: { color: 'rgba(0,78,112,0.1)' },
           angleLines: { color: 'rgba(0,78,112,0.15)' },
         },
       },
       plugins: {
         legend: { display: true, position: 'bottom', labels: { font: { size: 12 }, boxWidth: 15, color: '#1a2b3c', padding: 20 } },
+        tooltip: {
+          callbacks: {
+            title(items) {
+              const item = items?.[0];
+              if (!item) return '';
+              const meta = comparisonSeries[item.dataIndex];
+              return meta?.year ? `${meta.label} · ${meta.year}` : meta?.label || '';
+            },
+          },
+        },
       },
     },
   });
+}
+
+function updateGovHistoryChart(govData, countryName) {
+  if (govRadarNote) {
+    govRadarNote.textContent = getGovHistoryNormalizationNote();
+  }
+  if (govChartTitle) {
+    govChartTitle.textContent = getGovOverviewTitle();
+  }
+
+  const startYear = 2020;
+  const endYear = Math.max(2026, new Date().getFullYear());
+  const yearLabels = Array.from({ length: endYear - startYear + 1 }, (_, index) => String(startYear + index));
+
+  const chartCtx = document.getElementById('govRadarChart')?.getContext('2d');
+  if (!chartCtx || !yearLabels.length) return;
+  if (_govRadarChart) {
+    _govRadarChart.destroy();
+    _govRadarChart = null;
+  }
+
+  const datasets = GOV_INDEX_ORDER
+    .filter((indexKey) => govData[indexKey]?.availableYears?.length)
+    .map((indexKey) => {
+      const interpolated = buildInterpolatedGovHistorySeries(indexKey, govData[indexKey], startYear, endYear);
+      if (!interpolated) return null;
+      return {
+        label: getGovIndexDisplayName(indexKey),
+        data: interpolated.values,
+        borderColor: GOV_OVERVIEW_COLORS[indexKey],
+        backgroundColor: hexToRgba(GOV_OVERVIEW_COLORS[indexKey], 0.12),
+        pointBackgroundColor: GOV_OVERVIEW_COLORS[indexKey],
+        pointBorderColor: '#ffffff',
+        pointRadius: yearLabels.map((year) => interpolated.observedSet.has(Number(year)) ? 5 : 0),
+        pointHoverRadius: yearLabels.map((year) => interpolated.observedSet.has(Number(year)) ? 7 : 0),
+        spanGaps: true,
+        borderWidth: 2,
+        tension: 0.28,
+      };
+    })
+    .filter(Boolean);
+
+  _govRadarChart = new Chart(chartCtx, {
+    type: 'line',
+    data: {
+      labels: yearLabels,
+      datasets,
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: {
+        padding: { top: 8, right: 12, bottom: 28, left: 12 },
+      },
+      interaction: {
+        mode: 'nearest',
+        intersect: false,
+      },
+      scales: {
+        x: {
+          ticks: { color: '#51687c', font: { size: 11, weight: '600' } },
+          grid: { color: 'rgba(0,78,112,0.08)' },
+        },
+        y: {
+          min: 0,
+          max: 1,
+          ticks: {
+            stepSize: 0.25,
+            color: '#6b8599',
+            font: { size: 10, weight: '500' },
+          },
+          grid: { color: 'rgba(0,78,112,0.08)' },
+        },
+      },
+      plugins: {
+        legend: {
+          display: true,
+          position: 'bottom',
+          labels: { font: { size: 12 }, boxWidth: 15, color: '#1a2b3c', padding: 16 },
+        },
+        tooltip: {
+          callbacks: {
+            label(context) {
+              const datasetIndexKey = GOV_INDEX_ORDER.find((key) => getGovIndexDisplayName(key) === context.dataset.label);
+              if (!datasetIndexKey) return context.dataset.label;
+              const entry = getGovSeriesEntry(govData[datasetIndexKey], context.label);
+              if (entry?.score != null) {
+                return `${context.dataset.label}: ${formatGovScore(datasetIndexKey, entry.score)}`;
+              }
+              const scaleMax = GOV_INDEX_META[datasetIndexKey].scaleMax;
+              const interpolatedValue = context.raw != null ? formatGovScore(datasetIndexKey, context.raw * scaleMax) : 'Sin dato';
+              return `${context.dataset.label}: ${interpolatedValue} (estimado)`;
+            },
+          },
+        },
+      },
+    },
+  });
+}
+
+function updateGovOverviewChart(govData, countryName, isRegionAggregate = false) {
+  if (_govRadarChart) {
+    _govRadarChart.destroy();
+    _govRadarChart = null;
+  }
+
+  if (govChartView === 'history') {
+    updateGovHistoryChart(govData, countryName);
+    return;
+  }
+
+  updateGovComparisonChart(govData, countryName, isRegionAggregate);
 }
 
 function renderGovSection(govData, countryName, countryIso, allAlcNames) {
@@ -1507,8 +1724,18 @@ function renderGovSection(govData, countryName, countryIso, allAlcNames) {
     container.appendChild(buildGovCard({ indexKey, indexData, countryName, countryIso, allAlcNames, onYearChange }));
   });
 
-  updateGovRadarChart(govData, countryName);
-}
+  if (govChartToggle) {
+    govChartToggle.querySelectorAll('[data-gov-chart-view]').forEach((button) => {
+      button.classList.toggle('active', button.dataset.govChartView === govChartView);
+      button.onclick = () => {
+        govChartView = button.dataset.govChartView || 'comparison';
+        renderGovSection(govData, countryName, countryIso, allAlcNames);
+      };
+    });
+  }
+
+    updateGovOverviewChart(govData, countryName, countryIso === REGION_AGGREGATE_ISO);
+  }
 
 function renderDimRadarChart(indexKey, rows, countryName, isRegionAggregate) {
   const radarCtx = document.getElementById('dimRadarChart')?.getContext('2d');
@@ -1674,21 +1901,30 @@ function renderDimensionsSection(govData, countryName, allNamesMap, countryIso) 
 
   renderDimRadarChart(activeDimIndex, rows, countryName, Boolean(govData?.isRegionAggregate));
 
-  listContainer.innerHTML = rows.map((row, index) => {
-    const scoreText = formatGovScore(activeDimIndex, row.score);
-    const avgText = formatGovScore(activeDimIndex, row.alcAvg);
-    const diffText = row.diff == null
-      ? '\u2014'
-      : `${row.diff >= 0 ? '+' : '-'}${formatLocaleNumber(Math.abs(row.diff), 2, false)}`;
+    const isRegionAggregate = Boolean(govData?.isRegionAggregate);
+    listContainer.innerHTML = rows.map((row, index) => {
+      const scoreText = formatGovScore(activeDimIndex, row.score);
+      const avgText = formatGovScore(activeDimIndex, row.alcAvg);
+      const diffText = row.diff == null
+        ? '\u2014'
+        : `${row.diff >= 0 ? '+' : '-'}${formatLocaleNumber(Math.abs(row.diff), 2, false)}`;
     const diffClass = row.diff == null ? '' : (row.diff >= 0 ? 'dim-diff-positive' : 'dim-diff-negative');
     const subindexScaleMax = getGovSubindexScaleMax(activeDimIndex);
     const width = subindexScaleMax
       ? Math.min(100, ((row.score ?? 0) / subindexScaleMax) * 100)
       : 0;
-    const rankText = row.rankALC != null ? formatGovRank(row.rankALC, true) : (govData?.isRegionAggregate ? 'ALC' : '\u2014');
+      const rankText = row.rankALC != null ? formatGovRank(row.rankALC, true) : (isRegionAggregate ? 'ALC' : '\u2014');
+      const footerHtml = isRegionAggregate
+        ? ''
+        : `
+          <div class="dim-row-footer">
+            <span class="dim-row-footer-avg">ALC ${avgText}</span>
+            <span class="dim-row-footer-diff ${diffClass}">\u0394 ${diffText}</span>
+          </div>
+        `;
 
-    return `
-      <div class="dim-row" title="${escapeHtmlAttr(row.tooltip)}" aria-label="${escapeHtmlAttr(row.tooltip)}">
+      return `
+        <div class="dim-row" title="${escapeHtmlAttr(row.tooltip)}" aria-label="${escapeHtmlAttr(row.tooltip)}">
         <div class="dim-row-header">
           <div class="dim-row-title" style="color:${row.color}">
             <span class="dim-dot">\u25CF</span> ${row.shortLabel}
@@ -1698,18 +1934,15 @@ function renderDimensionsSection(govData, countryName, allNamesMap, countryIso) 
             <div class="dim-row-rank">${rankText}</div>
           </div>
         </div>
-        <div class="dim-row-bar-wrap">
-          <div class="dim-row-bar-track"></div>
-          <div class="dim-row-bar-fill" style="width:${width.toFixed(1)}%; background-color:${row.color}"></div>
+          <div class="dim-row-bar-wrap">
+            <div class="dim-row-bar-track"></div>
+            <div class="dim-row-bar-fill" style="width:${width.toFixed(1)}%; background-color:${row.color}"></div>
+          </div>
+          ${footerHtml}
         </div>
-        <div class="dim-row-footer">
-          <span class="dim-row-footer-avg">ALC ${avgText}</span>
-          <span class="dim-row-footer-diff ${diffClass}">\u0394 ${diffText}</span>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
+      `;
+    }).join('');
+  }
 
 function renderCountryInfo(country) {
   const isRegionAggregate = Boolean(country.isRegionAggregate);

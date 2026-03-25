@@ -110,7 +110,6 @@
           <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Abrir men&uacute;">&#9776;</button>
         </div>
         <div class="header-right">
-          <p class="header-hint">Selecciona un pa&iacute;s en el mapa o aqu&iacute;:</p>
           <div class="select-wrapper country-picker" id="country-picker">
           <select id="country-select" class="country-select country-select-hidden" aria-hidden="true" tabindex="-1">
             <option value="">&mdash; Elige un pa&iacute;s &mdash;</option>
@@ -123,6 +122,13 @@
         </div>
         </div>
       </header>
+
+      <nav class="top-section-nav" aria-label="Navegación por secciones">
+        <a class="banner-section-link" href="#basic-section">Datos demográficos y macroeconómicos</a>
+        <a class="banner-section-link" href="#connectivity-section">Conectividad</a>
+        <a class="banner-section-link" href="#findex-section">Economía y talento digital</a>
+        <a class="banner-section-link" href="#gov-section">Índices de Desarrollo Digital del Gobierno</a>
+      </nav>
 
       <div class="country-banner hidden" id="country-banner">
         <img class="banner-flag" id="banner-flag" alt="" />
@@ -191,6 +197,7 @@
               <div class="gov-chart-toolbar">
                 <div class="gov-chart-heading">
                   <h4 class="gov-chart-title" id="gov-chart-title">Comparación entre índices</h4>
+                  <p class="gov-chart-subtitle" id="gov-radar-note"></p>
                 </div>
                 <div class="gov-chart-toggle" id="gov-chart-toggle" aria-label="Cambiar visualización de índices">
                   <button type="button" class="gov-chart-toggle-btn active" data-gov-chart-view="comparison">Comparativa</button>
@@ -198,7 +205,6 @@
                 </div>
               </div>
               <canvas id="govRadarChart"></canvas>
-              <p class="chart-method-note" id="gov-radar-note"></p>
             </div>
             <div class="gov-index-cards" id="gov-index-cards"></div>
           </div>
@@ -226,27 +232,27 @@
           <div class="gov-dim-container">
             <div class="gov-dim-tabs" id="gov-dim-tabs">
               <button class="dim-tab active" data-index="egdi">
-                <span class="dim-tab-title">EGDI</span>
+                <span class="dim-tab-title">eGOV</span>
                 <span class="dim-tab-sub">Naciones Unidas</span>
               </button>
               <button class="dim-tab" data-index="gtmi">
-                <span class="dim-tab-title">GTMI</span>
+                <span class="dim-tab-title">GovTech</span>
                 <span class="dim-tab-sub">Banco Mundial</span>
               </button>
               <button class="dim-tab" data-index="gci">
-                <span class="dim-tab-title">GCI</span>
-                <span class="dim-tab-sub">ITU</span>
+                <span class="dim-tab-title">Ciberseguridad</span>
+                <span class="dim-tab-sub">UIT</span>
               </button>
               <button class="dim-tab" data-index="ocde">
-                <span class="dim-tab-title">OCDE / BID</span>
-                <span class="dim-tab-sub">Gov. Digital</span>
+                <span class="dim-tab-title">Gobierno Digital</span>
+                <span class="dim-tab-sub">OCDE/BID</span>
               </button>
               <button class="dim-tab" data-index="ai">
-                <span class="dim-tab-title">AI Readiness</span>
+                <span class="dim-tab-title">Madurez IA</span>
                 <span class="dim-tab-sub">Oxford Insights</span>
               </button>
               <button class="dim-tab" data-index="nri">
-                <span class="dim-tab-title">NRI</span>
+                <span class="dim-tab-title">Preparación Red</span>
                 <span class="dim-tab-sub">Portulans</span>
               </button>
             </div>

@@ -462,6 +462,166 @@ def add_ai_history(result):
         }
 
 
+def add_nri_history(result):
+    workbook_years = ["2021", "2022", "2023", "2024", "2025"]
+
+    for year in workbook_years:
+        workbook = openpyxl.load_workbook(
+            ensure_download(
+                f"https://download.networkreadinessindex.org/reports/data/{year}/nri-{year}-dataset.xlsx",
+                f"nri_{year}.xlsx",
+            ),
+            data_only=True,
+            read_only=True,
+        )
+        worksheet = workbook[workbook.sheetnames[0]]
+        rows = list(worksheet.iter_rows(values_only=True))
+
+        header_index = None
+        iso_key = None
+        score_key = None
+        rank_key = None
+        technology_key = None
+        people_key = None
+        governance_key = None
+        impact_key = None
+        data_start = 0
+
+        for index, row in enumerate(rows[:12]):
+            normalized_headers = [str(value).strip() if value is not None else None for value in row]
+            row_index = {header: idx for idx, header in enumerate(normalized_headers) if header}
+
+            if "Code" in row_index and "NRI score" in row_index:
+                header_index = row_index
+                iso_key = "Code"
+                score_key = "NRI score"
+                rank_key = "NRI rank"
+                technology_key = "Technology"
+                people_key = "People"
+                governance_key = "Governance"
+                impact_key = "Impact"
+                data_start = index + 1
+                break
+
+            if "ISO3Code" in row_index and "NRI.score" in row_index:
+                header_index = row_index
+                iso_key = "ISO3Code"
+                score_key = "NRI.score"
+                rank_key = "NRI.ranking"
+                technology_key = "1.score"
+                people_key = "2.score"
+                governance_key = "3.score"
+                impact_key = "4.score"
+                data_start = index + 1
+                break
+
+        if not header_index:
+            first_row = rows[0] if rows else ()
+            if (
+                len(first_row) > 12
+                and isinstance(first_row[0], str)
+                and isinstance(first_row[1], str)
+                and len(str(first_row[1]).strip()) == 3
+                and to_number(first_row[6]) is not None
+            ):
+                header_index = {}
+                iso_key = 1
+                score_key = 6
+                rank_key = 8
+                technology_key = 9
+                people_key = 10
+                governance_key = 11
+                impact_key = 12
+                data_start = 0
+            else:
+                workbook.close()
+                raise RuntimeError(f"No se pudo detectar la cabecera del dataset NRI {year}")
+
+        if isinstance(iso_key, int):
+            required_indexes = [iso_key, score_key, rank_key, technology_key, people_key, governance_key, impact_key]
+        else:
+            required_indexes = [
+                header_index[iso_key],
+                header_index[score_key],
+                header_index[rank_key],
+                header_index[technology_key],
+                header_index[people_key],
+                header_index[governance_key],
+                header_index[impact_key],
+            ]
+
+        for row in rows[data_start:]:
+            if len(row) <= max(required_indexes):
+                continue
+
+            if isinstance(iso_key, int):
+                iso = row[iso_key]
+                score = to_number(row[score_key])
+                rank_world = row[rank_key]
+                technology = to_number(row[technology_key])
+                people = to_number(row[people_key])
+                governance = to_number(row[governance_key])
+                impact = to_number(row[impact_key])
+            else:
+                iso = row[header_index[iso_key]]
+                score = to_number(row[header_index[score_key]])
+                rank_world = row[header_index[rank_key]]
+                technology = to_number(row[header_index[technology_key]])
+                people = to_number(row[header_index[people_key]])
+                governance = to_number(row[header_index[governance_key]])
+                impact = to_number(row[header_index[impact_key]])
+
+            if not iso or str(iso) not in result:
+                continue
+
+            if score is None:
+                continue
+
+            ensure_index(result, str(iso), "nri")[year] = {
+                "score": score,
+                "rankWorld": int(rank_world) if rank_world is not None else None,
+                "subindices": {
+                    "technology": technology,
+                    "people": people,
+                    "governance": governance,
+                    "impact": impact,
+                },
+            }
+
+        workbook.close()
+
+    # 2020 is only published as official report/country briefs PDF.
+    reader = PdfReader(
+        str(
+            ensure_download(
+                "https://download.networkreadinessindex.org/reports/data/2020/nri-2020-country-briefs.pdf",
+                "nri_2020_country_briefs.pdf",
+            )
+        )
+    )
+    text_2020 = normalize_text(" ".join((page.extract_text() or "") for page in reader.pages))
+    pattern_2020 = [
+        r"NRI 2020 At-A-Glance: {alias} Network Readiness Index Rank: (\d+) \(out of 134\) Score:\s*([0-9.]+).*?A\. Technology pillar \d+ ([0-9.]+) C\. Governance pillar \d+ ([0-9.]+).*?B\. People pillar \d+ ([0-9.]+) D\. Impact pillar \d+ ([0-9.]+)"
+    ]
+
+    for iso, aliases in COUNTRY_ALIASES.items():
+        match = search_country(text_2020, aliases, pattern_2020)
+        if not match:
+            continue
+
+        rank_world, score, technology, governance, people, impact = match.groups()
+        ensure_index(result, iso, "nri")["2020"] = {
+            "score": to_number(score),
+            "rankWorld": int(rank_world) if rank_world else None,
+            "subindices": {
+                "technology": to_number(technology),
+                "people": to_number(people),
+                "governance": to_number(governance),
+                "impact": to_number(impact),
+            },
+        }
+
+
 def prune_empty(result):
     cleaned = {}
     for iso, data in result.items():
@@ -482,6 +642,7 @@ def main():
     add_gtmi_history(result)
     add_gci_history(result)
     add_ai_history(result)
+    add_nri_history(result)
     OUTPUT_PATH.write_text(json.dumps(prune_empty(result), ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"Wrote {OUTPUT_PATH}")
 

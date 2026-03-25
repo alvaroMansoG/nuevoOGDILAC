@@ -144,6 +144,68 @@
           "resilience": 70.03
         }
       }
+    },
+    "nri": {
+      "2020": {
+        "score": 50.36,
+        "rankWorld": 60,
+        "subindices": {
+          "technology": 38.66,
+          "people": 51.87,
+          "governance": 58.62,
+          "impact": 52.28
+        }
+      },
+      "2021": {
+        "score": 52.9172355814413,
+        "rankWorld": 58,
+        "subindices": {
+          "technology": 44.9162154458781,
+          "people": 56.4528658240172,
+          "governance": 56.1500252882916,
+          "impact": 54.1498357675781
+        }
+      },
+      "2022": {
+        "score": 52.9645335021519,
+        "rankWorld": 57,
+        "subindices": {
+          "technology": 43.4194683090189,
+          "people": 51.8815439877786,
+          "governance": 59.2573720678508,
+          "impact": 57.2997496439595
+        }
+      },
+      "2023": {
+        "score": 49.7780159628153,
+        "rankWorld": 61,
+        "subindices": {
+          "technology": 39.5293597347345,
+          "people": 44.2848975718652,
+          "governance": 59.4767653558372,
+          "impact": 55.8210411888243
+        }
+      },
+      "2024": {
+        "score": 48.99230616604591,
+        "rankWorld": 69,
+        "subindices": {
+          "technology": 39.887447990317405,
+          "people": 38.29269389872932,
+          "governance": 62.16725794420929,
+          "impact": 55.621824830927615
+        }
+      },
+      "2025": {
+        "score": 48.14105291834454,
+        "rankWorld": 68,
+        "subindices": {
+          "technology": 40.82153858951636,
+          "people": 37.58265725935209,
+          "governance": 58.37200013455833,
+          "impact": 55.78801568995137
+        }
+      }
     }
   },
   "BHS": {
@@ -549,6 +611,68 @@
           "resilience": 26.92
         }
       }
+    },
+    "nri": {
+      "2020": {
+        "score": 36.72,
+        "rankWorld": 101,
+        "subindices": {
+          "technology": 27.0,
+          "people": 37.21,
+          "governance": 35.63,
+          "impact": 47.04
+        }
+      },
+      "2021": {
+        "score": 41.0753799361851,
+        "rankWorld": 94,
+        "subindices": {
+          "technology": 29.4908506729398,
+          "people": 50.4153648954663,
+          "governance": 37.0848613439827,
+          "impact": 47.3104428323517
+        }
+      },
+      "2022": {
+        "score": 40.4131217595365,
+        "rankWorld": 97,
+        "subindices": {
+          "technology": 32.3480490060029,
+          "people": 41.39536944155,
+          "governance": 36.677944303766,
+          "impact": 51.231124286827
+        }
+      },
+      "2023": {
+        "score": 39.3500266540908,
+        "rankWorld": 97,
+        "subindices": {
+          "technology": 27.5972406074887,
+          "people": 43.5298921489004,
+          "governance": 35.7290373293586,
+          "impact": 50.5439365306155
+        }
+      },
+      "2024": {
+        "score": 38.24991051845023,
+        "rankWorld": 102,
+        "subindices": {
+          "technology": 25.189600199608837,
+          "people": 38.292792904198556,
+          "governance": 37.943628040119165,
+          "impact": 51.573620929874345
+        }
+      },
+      "2025": {
+        "score": 36.59666466518436,
+        "rankWorld": 104,
+        "subindices": {
+          "technology": 29.873722207890264,
+          "people": 30.943990248575414,
+          "governance": 35.5244772964624,
+          "impact": 50.04446890780937
+        }
+      }
     }
   },
   "BRA": {
@@ -685,6 +809,68 @@
           "publicSectorAdoption": 94.78,
           "developmentDiffusion": 46.57,
           "resilience": 67.88
+        }
+      }
+    },
+    "nri": {
+      "2020": {
+        "score": 50.58,
+        "rankWorld": 59,
+        "subindices": {
+          "technology": 38.95,
+          "people": 52.41,
+          "governance": 60.51,
+          "impact": 50.45
+        }
+      },
+      "2021": {
+        "score": 55.8591046617369,
+        "rankWorld": 52,
+        "subindices": {
+          "technology": 49.0758060643626,
+          "people": 57.3547829023396,
+          "governance": 62.8882286220285,
+          "impact": 54.1176010582169
+        }
+      },
+      "2022": {
+        "score": 57.010418914805,
+        "rankWorld": 44,
+        "subindices": {
+          "technology": 50.8736904108746,
+          "people": 53.0743248113815,
+          "governance": 68.8825901040463,
+          "impact": 55.2110703329175
+        }
+      },
+      "2023": {
+        "score": 54.6680547076086,
+        "rankWorld": 44,
+        "subindices": {
+          "technology": 47.0056453512086,
+          "people": 50.3086124865995,
+          "governance": 68.7202804077957,
+          "impact": 52.6376805848308
+        }
+      },
+      "2024": {
+        "score": 55.203924498066,
+        "rankWorld": 44,
+        "subindices": {
+          "technology": 48.875286886467585,
+          "people": 45.526498268329085,
+          "governance": 71.7689140093794,
+          "impact": 54.64499882808793
+        }
+      },
+      "2025": {
+        "score": 53.643450580246274,
+        "rankWorld": 51,
+        "subindices": {
+          "technology": 45.98608702727356,
+          "people": 44.27784247888889,
+          "governance": 70.84742164020425,
+          "impact": 53.46245117461839
         }
       }
     }
@@ -981,6 +1167,68 @@
           "resilience": 56.46
         }
       }
+    },
+    "nri": {
+      "2020": {
+        "score": 54.06,
+        "rankWorld": 50,
+        "subindices": {
+          "technology": 45.92,
+          "people": 56.15,
+          "governance": 64.6,
+          "impact": 49.57
+        }
+      },
+      "2021": {
+        "score": 56.8921108440927,
+        "rankWorld": 44,
+        "subindices": {
+          "technology": 49.0149173828231,
+          "people": 57.2182354955436,
+          "governance": 65.7792365741633,
+          "impact": 55.5560539238408
+        }
+      },
+      "2022": {
+        "score": 57.1948742329316,
+        "rankWorld": 43,
+        "subindices": {
+          "technology": 51.1373246993875,
+          "people": 50.3836641784315,
+          "governance": 69.8392433294941,
+          "impact": 57.419264724413
+        }
+      },
+      "2023": {
+        "score": 53.1790293867885,
+        "rankWorld": 48,
+        "subindices": {
+          "technology": 41.465656508731,
+          "people": 46.7750660548745,
+          "governance": 68.6527502071131,
+          "impact": 55.8226447764352
+        }
+      },
+      "2024": {
+        "score": 53.39712321726121,
+        "rankWorld": 54,
+        "subindices": {
+          "technology": 42.53618906078924,
+          "people": 44.197874432569854,
+          "governance": 71.60615222024212,
+          "impact": 55.24827715544365
+        }
+      },
+      "2025": {
+        "score": 51.8656449533879,
+        "rankWorld": 57,
+        "subindices": {
+          "technology": 44.00610819652477,
+          "people": 39.02814757903398,
+          "governance": 69.95187444961444,
+          "impact": 54.47644958837841
+        }
+      }
     }
   },
   "COL": {
@@ -1126,6 +1374,68 @@
           "publicSectorAdoption": 70.7,
           "developmentDiffusion": 35.33,
           "resilience": 50.28
+        }
+      }
+    },
+    "nri": {
+      "2020": {
+        "score": 46.81,
+        "rankWorld": 72,
+        "subindices": {
+          "technology": 36.44,
+          "people": 45.78,
+          "governance": 54.76,
+          "impact": 50.27
+        }
+      },
+      "2021": {
+        "score": 50.5545680676062,
+        "rankWorld": 65,
+        "subindices": {
+          "technology": 44.4170622655513,
+          "people": 49.1092634310012,
+          "governance": 54.1138437119046,
+          "impact": 54.5781028619677
+        }
+      },
+      "2022": {
+        "score": 49.9882873601674,
+        "rankWorld": 66,
+        "subindices": {
+          "technology": 45.4348304958111,
+          "people": 47.037013061658,
+          "governance": 55.3729435228872,
+          "impact": 52.1083623603133
+        }
+      },
+      "2023": {
+        "score": 48.2790017688189,
+        "rankWorld": 65,
+        "subindices": {
+          "technology": 40.403673972653,
+          "people": 45.5148350011751,
+          "governance": 54.6457355548622,
+          "impact": 52.5517625465853
+        }
+      },
+      "2024": {
+        "score": 49.64258953090126,
+        "rankWorld": 64,
+        "subindices": {
+          "technology": 44.2579215090312,
+          "people": 44.58403867967214,
+          "governance": 57.14751795992121,
+          "impact": 52.58087997498048
+        }
+      },
+      "2025": {
+        "score": 49.674014916864586,
+        "rankWorld": 63,
+        "subindices": {
+          "technology": 43.74363419258983,
+          "people": 47.60953361868829,
+          "governance": 54.510762357160324,
+          "impact": 52.83212949901989
         }
       }
     }
@@ -1275,6 +1585,68 @@
           "resilience": 58.76
         }
       }
+    },
+    "nri": {
+      "2020": {
+        "score": 52.15,
+        "rankWorld": 54,
+        "subindices": {
+          "technology": 44.64,
+          "people": 49.59,
+          "governance": 57.13,
+          "impact": 57.24
+        }
+      },
+      "2021": {
+        "score": 53.807420025814,
+        "rankWorld": 56,
+        "subindices": {
+          "technology": 48.5648936736263,
+          "people": 45.0480910168757,
+          "governance": 59.7225080524867,
+          "impact": 61.8941873602674
+        }
+      },
+      "2022": {
+        "score": 53.3438297302126,
+        "rankWorld": 56,
+        "subindices": {
+          "technology": 50.2634828569829,
+          "people": 42.1147423550549,
+          "governance": 60.4524975988614,
+          "impact": 60.5445961099513
+        }
+      },
+      "2023": {
+        "score": 50.9940397357395,
+        "rankWorld": 57,
+        "subindices": {
+          "technology": 44.2160397838596,
+          "people": 39.5069682415947,
+          "governance": 60.2952900642734,
+          "impact": 59.9578608532302
+        }
+      },
+      "2024": {
+        "score": 53.44335287012821,
+        "rankWorld": 52,
+        "subindices": {
+          "technology": 42.38194735367817,
+          "people": 43.907029175720986,
+          "governance": 62.740113737738454,
+          "impact": 64.74432121337522
+        }
+      },
+      "2025": {
+        "score": 54.7597197095145,
+        "rankWorld": 42,
+        "subindices": {
+          "technology": 42.824686773311555,
+          "people": 43.61513096087231,
+          "governance": 67.46591017788182,
+          "impact": 65.1331509259923
+        }
+      }
     }
   },
   "DOM": {
@@ -1420,6 +1792,68 @@
           "publicSectorAdoption": 70.62,
           "developmentDiffusion": 22.39,
           "resilience": 39.19
+        }
+      }
+    },
+    "nri": {
+      "2020": {
+        "score": 45.77,
+        "rankWorld": 75,
+        "subindices": {
+          "technology": 32.78,
+          "people": 47.06,
+          "governance": 53.08,
+          "impact": 50.17
+        }
+      },
+      "2021": {
+        "score": 45.3281902918232,
+        "rankWorld": 82,
+        "subindices": {
+          "technology": 32.1908879672492,
+          "people": 48.6274350834743,
+          "governance": 55.6614526327781,
+          "impact": 44.8329854837912
+        }
+      },
+      "2022": {
+        "score": 45.3281411904505,
+        "rankWorld": 85,
+        "subindices": {
+          "technology": 36.4452917329379,
+          "people": 41.3322919751073,
+          "governance": 54.8162610742648,
+          "impact": 48.7187199794919
+        }
+      },
+      "2023": {
+        "score": 43.4927943706774,
+        "rankWorld": 84,
+        "subindices": {
+          "technology": 31.5793999065192,
+          "people": 43.7283833760437,
+          "governance": 53.3937375251826,
+          "impact": 45.2696566749642
+        }
+      },
+      "2024": {
+        "score": 45.27094969174809,
+        "rankWorld": 80,
+        "subindices": {
+          "technology": 33.1929825430273,
+          "people": 42.271393774576815,
+          "governance": 53.470673503630245,
+          "impact": 52.148748945757994
+        }
+      },
+      "2025": {
+        "score": 46.0033598511447,
+        "rankWorld": 76,
+        "subindices": {
+          "technology": 33.51366374784858,
+          "people": 40.72641939256069,
+          "governance": 58.95999250291792,
+          "impact": 50.813363761251615
         }
       }
     }
@@ -1569,6 +2003,68 @@
           "resilience": 54.32
         }
       }
+    },
+    "nri": {
+      "2020": {
+        "score": 42.2,
+        "rankWorld": 85,
+        "subindices": {
+          "technology": 29.71,
+          "people": 41.7,
+          "governance": 46.97,
+          "impact": 50.43
+        }
+      },
+      "2021": {
+        "score": 42.7418425123194,
+        "rankWorld": 90,
+        "subindices": {
+          "technology": 37.5862772901371,
+          "people": 40.5230291106588,
+          "governance": 43.4614544076431,
+          "impact": 49.3966092408384
+        }
+      },
+      "2022": {
+        "score": 43.812746599864,
+        "rankWorld": 86,
+        "subindices": {
+          "technology": 38.6210541984592,
+          "people": 36.3653508156637,
+          "governance": 46.3281143245654,
+          "impact": 53.9364670607678
+        }
+      },
+      "2023": {
+        "score": 43.0514931106369,
+        "rankWorld": 85,
+        "subindices": {
+          "technology": 34.5277304615935,
+          "people": 37.7419247424806,
+          "governance": 46.8593972219588,
+          "impact": 53.0769200165146
+        }
+      },
+      "2024": {
+        "score": 44.76131448106036,
+        "rankWorld": 82,
+        "subindices": {
+          "technology": 34.900015107305755,
+          "people": 42.73412612342651,
+          "governance": 48.654632998393176,
+          "impact": 52.75648369511601
+        }
+      },
+      "2025": {
+        "score": 46.256771371147636,
+        "rankWorld": 74,
+        "subindices": {
+          "technology": 34.91325224642147,
+          "people": 41.958147565681145,
+          "governance": 55.41707324294999,
+          "impact": 52.73861242953793
+        }
+      }
     }
   },
   "GTM": {
@@ -1714,6 +2210,68 @@
           "publicSectorAdoption": 38.17,
           "developmentDiffusion": 11.94,
           "resilience": 29.32
+        }
+      }
+    },
+    "nri": {
+      "2020": {
+        "score": 35.51,
+        "rankWorld": 106,
+        "subindices": {
+          "technology": 24.72,
+          "people": 30.17,
+          "governance": 40.26,
+          "impact": 46.9
+        }
+      },
+      "2021": {
+        "score": 37.3543409564552,
+        "rankWorld": 105,
+        "subindices": {
+          "technology": 31.4151986701928,
+          "people": 30.5858841886233,
+          "governance": 38.3157864337854,
+          "impact": 49.1004945332193
+        }
+      },
+      "2022": {
+        "score": 37.8534985223812,
+        "rankWorld": 106,
+        "subindices": {
+          "technology": 33.212485532001,
+          "people": 26.4634894052479,
+          "governance": 40.2891260312616,
+          "impact": 51.4488931210143
+        }
+      },
+      "2023": {
+        "score": 35.8426711176485,
+        "rankWorld": 105,
+        "subindices": {
+          "technology": 26.6555096186674,
+          "people": 28.1539363286854,
+          "governance": 40.8390213462849,
+          "impact": 47.7222171769564
+        }
+      },
+      "2024": {
+        "score": 36.517264805902656,
+        "rankWorld": 105,
+        "subindices": {
+          "technology": 26.777816660634045,
+          "people": 30.7359484763244,
+          "governance": 41.50951482525867,
+          "impact": 47.04577926139351
+        }
+      },
+      "2025": {
+        "score": 36.915628030351236,
+        "rankWorld": 102,
+        "subindices": {
+          "technology": 28.77666956057025,
+          "people": 31.696739918963562,
+          "governance": 38.81151759432546,
+          "impact": 48.37758504754567
         }
       }
     }
@@ -1999,6 +2557,68 @@
           "publicSectorAdoption": 18.23,
           "developmentDiffusion": 10.87,
           "resilience": 21.85
+        }
+      }
+    },
+    "nri": {
+      "2020": {
+        "score": 36.23,
+        "rankWorld": 102,
+        "subindices": {
+          "technology": 26.02,
+          "people": 30.02,
+          "governance": 44.1,
+          "impact": 44.77
+        }
+      },
+      "2021": {
+        "score": 37.3663384327954,
+        "rankWorld": 104,
+        "subindices": {
+          "technology": 29.0217319230581,
+          "people": 36.9419291561288,
+          "governance": 41.4399799392063,
+          "impact": 42.0617127127884
+        }
+      },
+      "2022": {
+        "score": 37.8994355284337,
+        "rankWorld": 105,
+        "subindices": {
+          "technology": 28.9281892734251,
+          "people": 30.4039819864136,
+          "governance": 42.9657579268337,
+          "impact": 49.2998129270624
+        }
+      },
+      "2023": {
+        "score": 35.6999465465288,
+        "rankWorld": 107,
+        "subindices": {
+          "technology": 27.1233523678598,
+          "people": 27.8473999056317,
+          "governance": 40.9660600023362,
+          "impact": 46.8629739102873
+        }
+      },
+      "2024": {
+        "score": 36.39029027558475,
+        "rankWorld": 107,
+        "subindices": {
+          "technology": 24.850674957870154,
+          "people": 27.066242076346953,
+          "governance": 41.48465925662005,
+          "impact": 52.15958481150185
+        }
+      },
+      "2025": {
+        "score": 35.4758470622775,
+        "rankWorld": 108,
+        "subindices": {
+          "technology": 26.18733640807515,
+          "people": 27.278986776140027,
+          "governance": 39.12960156858987,
+          "impact": 49.307463496304955
         }
       }
     }
@@ -2295,6 +2915,68 @@
           "resilience": 55.94
         }
       }
+    },
+    "nri": {
+      "2020": {
+        "score": 47.36,
+        "rankWorld": 70,
+        "subindices": {
+          "technology": 38.48,
+          "people": 40.06,
+          "governance": 57.11,
+          "impact": 53.77
+        }
+      },
+      "2021": {
+        "score": 47.949352644052,
+        "rankWorld": 74,
+        "subindices": {
+          "technology": 41.6997563896886,
+          "people": 35.6487078766651,
+          "governance": 54.824349452711,
+          "impact": 59.6245968571433
+        }
+      },
+      "2022": {
+        "score": 46.9593978254997,
+        "rankWorld": 76,
+        "subindices": {
+          "technology": 42.5118862252625,
+          "people": 35.1027229735702,
+          "governance": 55.15763610072,
+          "impact": 55.0653460024462
+        }
+      },
+      "2023": {
+        "score": 46.1070050139242,
+        "rankWorld": 72,
+        "subindices": {
+          "technology": 35.3766060420758,
+          "people": 38.2762679665473,
+          "governance": 54.4925090526663,
+          "impact": 56.2826369944074
+        }
+      },
+      "2024": {
+        "score": 42.50361990470611,
+        "rankWorld": 93,
+        "subindices": {
+          "technology": 36.061865605186796,
+          "people": 29.557646554993624,
+          "governance": 53.918072986428285,
+          "impact": 50.476894472215754
+        }
+      },
+      "2025": {
+        "score": 40.35307782275782,
+        "rankWorld": 94,
+        "subindices": {
+          "technology": 33.78192011793141,
+          "people": 32.09059308908061,
+          "governance": 49.14308629450115,
+          "impact": 46.3967117895181
+        }
+      }
     }
   },
   "MEX": {
@@ -2440,6 +3122,68 @@
           "publicSectorAdoption": 66.11,
           "developmentDiffusion": 34.07,
           "resilience": 32.22
+        }
+      }
+    },
+    "nri": {
+      "2020": {
+        "score": 49.67,
+        "rankWorld": 63,
+        "subindices": {
+          "technology": 37.92,
+          "people": 48.89,
+          "governance": 54.92,
+          "impact": 56.96
+        }
+      },
+      "2021": {
+        "score": 52.5724082163983,
+        "rankWorld": 59,
+        "subindices": {
+          "technology": 45.23673230181,
+          "people": 53.452550516254,
+          "governance": 54.6535559566337,
+          "impact": 56.9467940908954
+        }
+      },
+      "2022": {
+        "score": 51.328788814997,
+        "rankWorld": 60,
+        "subindices": {
+          "technology": 45.0256152267948,
+          "people": 44.9835652012795,
+          "governance": 54.7496231853617,
+          "impact": 60.556351646552
+        }
+      },
+      "2023": {
+        "score": 49.5862274079563,
+        "rankWorld": 62,
+        "subindices": {
+          "technology": 39.6404905783668,
+          "people": 44.4428596877221,
+          "governance": 55.150097162253,
+          "impact": 59.1114622034833
+        }
+      },
+      "2024": {
+        "score": 50.32495865083972,
+        "rankWorld": 62,
+        "subindices": {
+          "technology": 39.320286510876834,
+          "people": 45.23951977681843,
+          "governance": 58.731311952943535,
+          "impact": 58.00871636272007
+        }
+      },
+      "2025": {
+        "score": 48.2934151070628,
+        "rankWorld": 67,
+        "subindices": {
+          "technology": 40.552775119796955,
+          "people": 42.651380685814715,
+          "governance": 53.131660748778955,
+          "impact": 56.83784387386057
         }
       }
     }
@@ -2589,6 +3333,38 @@
           "resilience": 20.64
         }
       }
+    },
+    "nri": {
+      "2023": {
+        "score": 33.3154094227131,
+        "rankWorld": 115,
+        "subindices": {
+          "technology": 17.1279131220576,
+          "people": 31.0498090523166,
+          "governance": 32.596776231687,
+          "impact": 52.4871392847913
+        }
+      },
+      "2024": {
+        "score": 33.5134964910425,
+        "rankWorld": 116,
+        "subindices": {
+          "technology": 13.741028612223472,
+          "people": 26.641203831383397,
+          "governance": 33.53101239813663,
+          "impact": 60.140741122426505
+        }
+      },
+      "2025": {
+        "score": 31.14744518936925,
+        "rankWorld": 117,
+        "subindices": {
+          "technology": 15.120479805178357,
+          "people": 27.084845791266503,
+          "governance": 23.899494559347115,
+          "impact": 58.48496060168503
+        }
+      }
     }
   },
   "PAN": {
@@ -2734,6 +3510,68 @@
           "publicSectorAdoption": 61.33,
           "developmentDiffusion": 20.84,
           "resilience": 30.73
+        }
+      }
+    },
+    "nri": {
+      "2020": {
+        "score": 44.74,
+        "rankWorld": 77,
+        "subindices": {
+          "technology": 39.99,
+          "people": 37.75,
+          "governance": 50.65,
+          "impact": 50.57
+        }
+      },
+      "2021": {
+        "score": 47.7627136017975,
+        "rankWorld": 75,
+        "subindices": {
+          "technology": 47.6144458185795,
+          "people": 42.5063453272586,
+          "governance": 48.3685485901047,
+          "impact": 52.5615146712473
+        }
+      },
+      "2022": {
+        "score": 45.7244197201738,
+        "rankWorld": 83,
+        "subindices": {
+          "technology": 41.7359073430233,
+          "people": 39.27588031488,
+          "governance": 48.6436365971186,
+          "impact": 53.2422546256732
+        }
+      },
+      "2023": {
+        "score": 43.0296067967439,
+        "rankWorld": 86,
+        "subindices": {
+          "technology": 38.2479311884878,
+          "people": 35.3399329541221,
+          "governance": 48.3592439882778,
+          "impact": 50.1713190560878
+        }
+      },
+      "2024": {
+        "score": 45.61029013403213,
+        "rankWorld": 78,
+        "subindices": {
+          "technology": 37.46606232812769,
+          "people": 39.463781182252575,
+          "governance": 51.8819822358714,
+          "impact": 53.62933478987686
+        }
+      },
+      "2025": {
+        "score": 43.818607133684615,
+        "rankWorld": 83,
+        "subindices": {
+          "technology": 37.7436702607144,
+          "people": 34.841350280514945,
+          "governance": 49.41256641620455,
+          "impact": 53.27684157730456
         }
       }
     }
@@ -2883,6 +3721,68 @@
           "resilience": 55.57
         }
       }
+    },
+    "nri": {
+      "2020": {
+        "score": 43.67,
+        "rankWorld": 80,
+        "subindices": {
+          "technology": 31.44,
+          "people": 44.79,
+          "governance": 49.98,
+          "impact": 48.47
+        }
+      },
+      "2021": {
+        "score": 47.9573396838135,
+        "rankWorld": 73,
+        "subindices": {
+          "technology": 37.7116854213256,
+          "people": 51.1337854400689,
+          "governance": 48.5052225854598,
+          "impact": 54.4786652883996
+        }
+      },
+      "2022": {
+        "score": 46.7138005394801,
+        "rankWorld": 78,
+        "subindices": {
+          "technology": 38.9247924515646,
+          "people": 44.3473049437296,
+          "governance": 50.631404262608,
+          "impact": 52.9517005000181
+        }
+      },
+      "2023": {
+        "score": 45.8861803763347,
+        "rankWorld": 73,
+        "subindices": {
+          "technology": 32.5480589261371,
+          "people": 48.3337028476901,
+          "governance": 50.5661570003862,
+          "impact": 52.0968027311255
+        }
+      },
+      "2024": {
+        "score": 44.76124809668272,
+        "rankWorld": 83,
+        "subindices": {
+          "technology": 30.746683080491938,
+          "people": 44.06713990390949,
+          "governance": 53.60645718204851,
+          "impact": 50.62471222028095
+        }
+      },
+      "2025": {
+        "score": 45.243636109877954,
+        "rankWorld": 80,
+        "subindices": {
+          "technology": 34.12335379809834,
+          "people": 43.36036023425879,
+          "governance": 51.642834920672925,
+          "impact": 51.84799548648176
+        }
+      }
     }
   },
   "PRY": {
@@ -3030,6 +3930,68 @@
           "resilience": 34.6
         }
       }
+    },
+    "nri": {
+      "2020": {
+        "score": 41.12,
+        "rankWorld": 92,
+        "subindices": {
+          "technology": 25.81,
+          "people": 36.56,
+          "governance": 52.08,
+          "impact": 50.03
+        }
+      },
+      "2021": {
+        "score": 43.3575841906851,
+        "rankWorld": 88,
+        "subindices": {
+          "technology": 31.7132929436813,
+          "people": 43.0035748049304,
+          "governance": 50.5663805762872,
+          "impact": 48.1470884378416
+        }
+      },
+      "2022": {
+        "score": 41.8614705160286,
+        "rankWorld": 93,
+        "subindices": {
+          "technology": 31.17649619227,
+          "people": 33.7865596335997,
+          "governance": 50.2767844812968,
+          "impact": 52.2060417569479
+        }
+      },
+      "2023": {
+        "score": 41.9130657979761,
+        "rankWorld": 89,
+        "subindices": {
+          "technology": 26.2282363620584,
+          "people": 39.1737015884055,
+          "governance": 49.3601205467968,
+          "impact": 52.8902046946438
+        }
+      },
+      "2024": {
+        "score": 42.2607472867869,
+        "rankWorld": 94,
+        "subindices": {
+          "technology": 30.395845788782726,
+          "people": 38.07955467516381,
+          "governance": 50.81318061748666,
+          "impact": 49.75440806571442
+        }
+      },
+      "2025": {
+        "score": 42.94566827595464,
+        "rankWorld": 86,
+        "subindices": {
+          "technology": 31.21793395047439,
+          "people": 36.39685226606563,
+          "governance": 52.64478358279319,
+          "impact": 51.523103304485346
+        }
+      }
     }
   },
   "SLV": {
@@ -3175,6 +4137,68 @@
           "publicSectorAdoption": 64.19,
           "developmentDiffusion": 28.58,
           "resilience": 52.9
+        }
+      }
+    },
+    "nri": {
+      "2020": {
+        "score": 37.33,
+        "rankWorld": 95,
+        "subindices": {
+          "technology": 25.81,
+          "people": 30.62,
+          "governance": 40.55,
+          "impact": 52.35
+        }
+      },
+      "2021": {
+        "score": 40.1383997607055,
+        "rankWorld": 98,
+        "subindices": {
+          "technology": 29.354403746404,
+          "people": 38.0304975032245,
+          "governance": 41.4479312525803,
+          "impact": 51.7207665406131
+        }
+      },
+      "2022": {
+        "score": 40.6596939691609,
+        "rankWorld": 96,
+        "subindices": {
+          "technology": 31.5198792399571,
+          "people": 30.7982229154258,
+          "governance": 40.9341025149094,
+          "impact": 59.3865712063513
+        }
+      },
+      "2023": {
+        "score": 38.0749609064417,
+        "rankWorld": 100,
+        "subindices": {
+          "technology": 27.1437731600915,
+          "people": 30.046082118351,
+          "governance": 38.7506600922786,
+          "impact": 56.3593282550459
+        }
+      },
+      "2024": {
+        "score": 39.3608323690604,
+        "rankWorld": 99,
+        "subindices": {
+          "technology": 28.551905756479186,
+          "people": 35.539435139918815,
+          "governance": 39.825537302164044,
+          "impact": 53.526451277679534
+        }
+      },
+      "2025": {
+        "score": 38.61675132560518,
+        "rankWorld": 99,
+        "subindices": {
+          "technology": 32.09286406988614,
+          "people": 34.431337787529806,
+          "governance": 34.41555354731194,
+          "impact": 53.52724989769282
         }
       }
     }
@@ -3471,6 +4495,58 @@
           "resilience": 33.67
         }
       }
+    },
+    "nri": {
+      "2020": {
+        "score": 43.61,
+        "rankWorld": 81,
+        "subindices": {
+          "technology": 36.12,
+          "people": 38.16,
+          "governance": 51.94,
+          "impact": 48.22
+        }
+      },
+      "2021": {
+        "score": 44.7978754871152,
+        "rankWorld": 85,
+        "subindices": {
+          "technology": 37.3819132867915,
+          "people": 43.0711267677238,
+          "governance": 50.9804188469725,
+          "impact": 47.7580430469731
+        }
+      },
+      "2022": {
+        "score": 42.1801241541279,
+        "rankWorld": 92,
+        "subindices": {
+          "technology": 33.366229776257,
+          "people": 35.617560425524,
+          "governance": 52.2399317759997,
+          "impact": 47.4967746387307
+        }
+      },
+      "2024": {
+        "score": 36.47856005923901,
+        "rankWorld": 106,
+        "subindices": {
+          "technology": 29.31047619198056,
+          "people": 24.575925835654214,
+          "governance": 48.438249915751186,
+          "impact": 43.589588293570074
+        }
+      },
+      "2025": {
+        "score": 37.10036192653621,
+        "rankWorld": 101,
+        "subindices": {
+          "technology": 28.490822171497552,
+          "people": 27.755622310742964,
+          "governance": 51.61570002011928,
+          "impact": 40.53930320378505
+        }
+      }
     }
   },
   "URY": {
@@ -3618,6 +4694,68 @@
           "resilience": 52.35
         }
       }
+    },
+    "nri": {
+      "2020": {
+        "score": 54.87,
+        "rankWorld": 47,
+        "subindices": {
+          "technology": 46.96,
+          "people": 54.63,
+          "governance": 61.4,
+          "impact": 56.49
+        }
+      },
+      "2021": {
+        "score": 56.375479707221,
+        "rankWorld": 49,
+        "subindices": {
+          "technology": 51.9912704564523,
+          "people": 54.9694845847395,
+          "governance": 60.4477069854394,
+          "impact": 58.0934568022527
+        }
+      },
+      "2022": {
+        "score": 56.116678394815,
+        "rankWorld": 47,
+        "subindices": {
+          "technology": 48.6290886003753,
+          "people": 51.1137100571873,
+          "governance": 64.0669827651067,
+          "impact": 60.6569321565906
+        }
+      },
+      "2023": {
+        "score": 54.5018150652433,
+        "rankWorld": 45,
+        "subindices": {
+          "technology": 47.8017382257183,
+          "people": 47.7951547786879,
+          "governance": 62.1247631043866,
+          "impact": 60.2856041521802
+        }
+      },
+      "2024": {
+        "score": 53.39775379468311,
+        "rankWorld": 53,
+        "subindices": {
+          "technology": 43.490966105047924,
+          "people": 46.018336153020755,
+          "governance": 64.12455870525447,
+          "impact": 59.95715421540928
+        }
+      },
+      "2025": {
+        "score": 54.03831698872398,
+        "rankWorld": 48,
+        "subindices": {
+          "technology": 45.359587869881125,
+          "people": 43.90420513425179,
+          "governance": 65.45221503997237,
+          "impact": 61.43725991079064
+        }
+      }
     }
   },
   "VEN": {
@@ -3718,6 +4856,38 @@
           "publicSectorAdoption": 27.36,
           "developmentDiffusion": 12.77,
           "resilience": 38.22
+        }
+      }
+    },
+    "nri": {
+      "2020": {
+        "score": 34.57,
+        "rankWorld": 108,
+        "subindices": {
+          "technology": 19.61,
+          "people": 33.34,
+          "governance": 40.02,
+          "impact": 45.33
+        }
+      },
+      "2023": {
+        "score": 39.981682382782,
+        "rankWorld": 93,
+        "subindices": {
+          "technology": 31.5129486980009,
+          "people": 32.1388344661264,
+          "governance": 42.1067203937528,
+          "impact": 54.1682259732479
+        }
+      },
+      "2024": {
+        "score": 36.83593021205294,
+        "rankWorld": 104,
+        "subindices": {
+          "technology": 28.46816189342593,
+          "people": 29.014386006140796,
+          "governance": 43.1885913121642,
+          "impact": 46.672581636480864
         }
       }
     }

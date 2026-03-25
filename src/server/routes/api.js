@@ -11,13 +11,12 @@ const {
 const { GOV_DATA, ALC_GOV_STATS } = require('../data/govStatic');
 const { buildRegionalAggregateIndicators } = require('../domain/aggregates');
 const { buildIndicatorRanking } = require('../domain/rankings');
-const { buildCountryGovData, buildRegionalGovData, buildNetworkReadinessGovIndex } = require('../domain/govSeries');
+const { buildCountryGovData, buildRegionalGovData } = require('../domain/govSeries');
 const { createMemoryCache } = require('../utils/cache');
 const { getExchangeRates } = require('../services/exchangeRates');
 const { fetchWorldBankCountryMetadata, fetchWorldBankRegionIndicator } = require('../services/worldBank');
 const { fetchData360RegionIndicator } = require('../services/data360');
 const { fetchUndpRegionIndicator } = require('../services/undp');
-const { fetchNetworkReadinessData } = require('../services/networkReadiness');
 
 const responseCache = createMemoryCache(5 * 60 * 1000);
 
@@ -67,7 +66,6 @@ function buildApiRouter() {
         getExchangeRates(),
         isRegionAggregate ? Promise.resolve({ incomeLevel: null }) : fetchWorldBankCountryMetadata(iso),
         fetchUndpRegionIndicator('hdi', getRegionFallbackRankings),
-        fetchNetworkReadinessData(),
         ...entries.map(([, def]) => {
           if (def.databaseId) {
             return fetchData360RegionIndicator(
@@ -90,10 +88,6 @@ function buildApiRouter() {
       const hdiRegionData = hdiRegionResult.status === 'fulfilled'
         ? hdiRegionResult.value
         : getRegionFallbackRankings('hdi');
-      const networkReadinessResult = indicatorRegionResults.shift();
-      const nriByIso = networkReadinessResult?.status === 'fulfilled'
-        ? networkReadinessResult.value
-        : {};
       const regionDataByKey = {};
       entries.forEach(([key], index) => {
         const result = indicatorRegionResults[index];
@@ -118,7 +112,6 @@ function buildApiRouter() {
           }),
           govData: buildRegionalGovData(),
         };
-        data.govData.nri = buildNetworkReadinessGovIndex(nriByIso, null, true);
 
         responseCache.set(iso, data);
         return res.json(data);
@@ -168,7 +161,6 @@ function buildApiRouter() {
       };
 
       data.govData = buildCountryGovData(iso);
-      data.govData.nri = buildNetworkReadinessGovIndex(nriByIso, iso, false);
 
       responseCache.set(iso, data);
       res.json(data);
