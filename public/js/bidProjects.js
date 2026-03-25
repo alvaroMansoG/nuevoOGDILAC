@@ -1,16 +1,45 @@
-const PAGE_SIZE = 10;
+const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT = { key: 'apprvl_dt', direction: 'desc' };
 const QUICK_RANGE_DAYS = {
   last7: 7,
   last30: 30,
   last365: 365,
 };
+const REGION_FLAG_ICON = '\uD83C\uDF0E';
 
 const STATUS_CLASS_BY_NAME = {
   preparacion: 'status-preparacion',
   implementacion: 'status-implementacion',
   cancelado: 'status-cancelado',
   cerrado: 'status-cerrado',
+};
+const ISO2_BY_COUNTRY_NAME = {
+  'Argentina': 'AR',
+  'Bahamas': 'BS',
+  'Barbados': 'BB',
+  'Belice': 'BZ',
+  'Bolivia': 'BO',
+  'Brasil': 'BR',
+  'Chile': 'CL',
+  'Colombia': 'CO',
+  'Costa Rica': 'CR',
+  'Ecuador': 'EC',
+  'El Salvador': 'SV',
+  'Guatemala': 'GT',
+  'Guyana': 'GY',
+  'Haití': 'HT',
+  'Honduras': 'HN',
+  'Jamaica': 'JM',
+  'México': 'MX',
+  'Nicaragua': 'NI',
+  'Panamá': 'PA',
+  'Perú': 'PE',
+  'Regional': 'RG',
+  'República Dominicana': 'DO',
+  'Surinam': 'SR',
+  'Trinidad y Tobago': 'TT',
+  'Uruguay': 'UY',
+  'Venezuela': 'VE',
 };
 
 function fixText(value) {
@@ -87,6 +116,56 @@ function normalizeForSearch(value) {
     .replace(/[\u0300-\u036f]/g, '');
 }
 
+function getCountryIso2(countryName, fallbackCode = '') {
+  const normalizedName = normalizeText(countryName);
+  const normalizedFallback = normalizeText(fallbackCode).toUpperCase();
+  const overrides = {
+    'Argentina': 'AR',
+    'Bahamas': 'BS',
+    'Barbados': 'BB',
+    'Belice': 'BZ',
+    'Bolivia': 'BO',
+    'Brasil': 'BR',
+    'Chile': 'CL',
+    'Colombia': 'CO',
+    'Costa Rica': 'CR',
+    'Ecuador': 'EC',
+    'El Salvador': 'SV',
+    'Guatemala': 'GT',
+    'Guyana': 'GY',
+    'Haití': 'HT',
+    'Honduras': 'HN',
+    'Jamaica': 'JM',
+    'México': 'MX',
+    'Nicaragua': 'NI',
+    'Panamá': 'PA',
+    'Paraguay': 'PY',
+    'Perú': 'PE',
+    'Regional': 'RG',
+    'República Dominicana': 'DO',
+    'Suriname': 'SR',
+    'Trinidad y Tobago': 'TT',
+    'Uruguay': 'UY',
+    'Venezuela': 'VE',
+  };
+  return overrides[normalizedName] || normalizedFallback;
+}
+
+function getFlagEmojiFromIso2(iso2) {
+  const normalized = normalizeText(iso2).toUpperCase();
+  if (!/^[A-Z]{2}$/.test(normalized)) return '';
+  return normalized
+    .split('')
+    .map((char) => String.fromCodePoint(127397 + char.charCodeAt(0)))
+    .join('');
+}
+
+function getFlagUrlFromIso2(iso2) {
+  const normalized = normalizeText(iso2).toLowerCase();
+  if (!/^[a-z]{2}$/.test(normalized)) return '';
+  return `https://flagcdn.com/w40/${normalized}.png`;
+}
+
 function isActiveProject(row) {
   return normalizeText(row?.sts_cd).toUpperCase() === 'ACTIVE'
     || normalizeForSearch(row?.publc_sts_nm) === 'activo';
@@ -130,7 +209,7 @@ function buildInitialFilters() {
     projectNumbers: [],
     projectNumberQuery: '',
     projectName: '',
-    country: '',
+    countries: null,
     subsector: '',
     status: '',
     quickRange: '',
@@ -141,6 +220,7 @@ function buildInitialFilters() {
 }
 
 export function createBidProjectsController({ section, filtersEl, summaryEl, tableShellEl, linksEl, navLink }) {
+  const subtitleEl = section?.querySelector('.section-subtitle') || null;
   const state = {
     status: 'idle',
     country: null,
@@ -152,13 +232,17 @@ export function createBidProjectsController({ section, filtersEl, summaryEl, tab
     filters: buildInitialFilters(),
     sort: { ...DEFAULT_SORT },
     page: 1,
+    pageSize: DEFAULT_PAGE_SIZE,
     errorMessage: '',
   };
 
-  function resetInteractiveState() {
+  function resetInteractiveState({ resetPageSize = false } = {}) {
     state.filters = buildInitialFilters();
     state.sort = { ...DEFAULT_SORT };
     state.page = 1;
+    if (resetPageSize) {
+      state.pageSize = DEFAULT_PAGE_SIZE;
+    }
   }
 
   function setSectionVisible(visible = true) {
@@ -172,7 +256,7 @@ export function createBidProjectsController({ section, filtersEl, summaryEl, tab
     state.rows = [];
     state.links = { sourceUrl: '', searchUrl: '' };
     state.errorMessage = '';
-    resetInteractiveState();
+    resetInteractiveState({ resetPageSize: true });
     setSectionVisible(true);
     render();
   }
@@ -182,6 +266,7 @@ export function createBidProjectsController({ section, filtersEl, summaryEl, tab
     state.country = country || null;
     state.rows = [];
     state.errorMessage = message || 'No se pudieron cargar los proyectos BID.';
+    state.pageSize = DEFAULT_PAGE_SIZE;
     setSectionVisible(true);
     render();
   }
@@ -195,7 +280,7 @@ export function createBidProjectsController({ section, filtersEl, summaryEl, tab
       searchUrl: payload?.searchUrl || '',
     };
     state.errorMessage = '';
-    resetInteractiveState();
+    resetInteractiveState({ resetPageSize: true });
     setSectionVisible(true);
     render();
   }
@@ -207,6 +292,42 @@ export function createBidProjectsController({ section, filtersEl, summaryEl, tab
     return rows
       .filter((row) => !selected.has(row.oper_num))
       .sort((left, right) => left.oper_num.localeCompare(right.oper_num, 'es', { sensitivity: 'base' }));
+  }
+
+  function getCountryOptions() {
+    const countryMap = new Map();
+    state.rows.forEach((row) => {
+      const countryName = normalizeText(row.cntry_nm);
+      const countryCode = normalizeText(row.cntry_cd).toUpperCase();
+      if (!countryName || countryCode === 'RG' || countryName === 'Regional') return;
+      const iso2 = getCountryIso2(countryName, countryCode);
+      countryMap.set(countryName, {
+        value: countryName,
+        label: countryName,
+        code: iso2,
+        flag: getFlagEmojiFromIso2(iso2),
+        flagUrl: getFlagUrlFromIso2(iso2),
+      });
+    });
+
+    return [
+      { value: '__REGIONAL__', label: 'Regional', code: 'ALC', flag: REGION_FLAG_ICON, flagUrl: '' },
+      ...Array.from(countryMap.values())
+        .sort((left, right) => left.label.localeCompare(right.label, 'es', { sensitivity: 'base' })),
+    ];
+  }
+
+  function getCountryOptionByValue(value) {
+    return getCountryOptions().find((option) => option.value === value) || null;
+  }
+
+  function isCountryFilterAllActive() {
+    return state.filters.countries === null;
+  }
+
+  function isCountryActive(value) {
+    if (isCountryFilterAllActive()) return true;
+    return Array.isArray(state.filters.countries) && state.filters.countries.includes(value);
   }
 
   function getDateRange() {
@@ -238,7 +359,7 @@ export function createBidProjectsController({ section, filtersEl, summaryEl, tab
     }
 
     const projectNameQuery = normalizeForSearch(state.filters.projectName);
-    const countryValue = ignoreCountry ? '' : state.filters.country;
+    const selectedCountries = ignoreCountry ? null : state.filters.countries;
     const subsectorValue = ignoreSubsector ? '' : state.filters.subsector;
     const statusValue = ignoreStatus ? '' : state.filters.status;
     const { dateFrom, dateTo } = getDateRange();
@@ -247,8 +368,15 @@ export function createBidProjectsController({ section, filtersEl, summaryEl, tab
       if (projectNameQuery && !normalizeForSearch(row.oper_nm).includes(projectNameQuery)) {
         return false;
       }
-      if (countryValue && row.cntry_nm !== countryValue) {
-        return false;
+      if (Array.isArray(selectedCountries)) {
+        if (!selectedCountries.length) {
+          return false;
+        }
+        const includeRegional = selectedCountries.includes('__REGIONAL__') && normalizeText(row.cntry_cd).toUpperCase() === 'RG';
+        const includeCountry = selectedCountries.includes(row.cntry_nm);
+        if (!includeRegional && !includeCountry) {
+          return false;
+        }
       }
       if (subsectorValue && row.subsector_nm !== subsectorValue) {
         return false;
@@ -290,10 +418,10 @@ export function createBidProjectsController({ section, filtersEl, summaryEl, tab
   function getDerivedState() {
     const filteredRows = applyFilters(state.rows);
     const sortedRows = sortRows(filteredRows, state.sort);
-    const totalPages = Math.max(1, Math.ceil(sortedRows.length / PAGE_SIZE));
+    const totalPages = Math.max(1, Math.ceil(sortedRows.length / state.pageSize));
     const page = Math.min(state.page, totalPages);
-    const start = (page - 1) * PAGE_SIZE;
-    const paginatedRows = sortedRows.slice(start, start + PAGE_SIZE);
+    const start = (page - 1) * state.pageSize;
+    const paginatedRows = sortedRows.slice(start, start + state.pageSize);
     const facetCountryRows = applyFilters(state.rows, { ignoreCountry: true });
     const facetSubsectorRows = applyFilters(state.rows, { ignoreSubsector: true });
     const facetStatusRows = applyFilters(state.rows, { ignoreStatus: true });
@@ -304,6 +432,7 @@ export function createBidProjectsController({ section, filtersEl, summaryEl, tab
       paginatedRows,
       totalPages,
       page,
+      pageSize: state.pageSize,
       countryOptions: getFacetCounts(facetCountryRows, 'cntry_nm'),
       subsectorOptions: getFacetCounts(facetSubsectorRows, 'subsector_nm'),
       statusOptions: getFacetCounts(facetStatusRows, 'publc_sts_nm'),
@@ -352,13 +481,55 @@ export function createBidProjectsController({ section, filtersEl, summaryEl, tab
           </button>
         `).join('')
       : '<span class="bid-project-chip-placeholder">Sin proyectos seleccionados</span>';
+    const countryTagsMarkup = getCountryOptions().map((option) => `
+      <button
+        type="button"
+        class="bid-country-option ${isCountryActive(option.value) ? 'is-active' : ''}"
+        data-country-toggle="${escapeHtmlAttr(option.value)}"
+        ${lockOtherFilters ? 'disabled' : ''}
+      >
+        ${option.flagUrl
+          ? `<img class="bid-country-option-flag-img" src="${escapeHtmlAttr(option.flagUrl)}" alt="" loading="lazy" aria-hidden="true" />`
+          : `<span class="bid-country-option-flag" aria-hidden="true">${escapeHtml(option.flag)}</span>`
+        }
+        <span class="bid-country-option-label">${escapeHtml(option.label)}</span>
+      </button>
+    `).join('');
 
     return `
-      <div class="bid-projects-filter-grid">
-        <div class="bid-filter-group bid-filter-group-wide">
-          <label class="bid-filter-label" for="bid-project-number-input">N&uacute;mero de proyecto</label>
-          <div class="bid-project-number-box">
-            <div class="bid-project-chip-list">${selectedProjectsMarkup}</div>
+      <div class="bid-projects-filter-layout">
+        ${isRegionAggregate ? `
+          <div class="bid-projects-filter-row bid-projects-filter-row-countries">
+            <div class="bid-filter-group bid-filter-group-country">
+              <div class="bid-filter-label-row">
+                <label class="bid-filter-label">Pa&iacute;ses</label>
+                <button type="button" class="bid-filter-button bid-filter-button-secondary bid-filter-button-small" id="bid-country-select-all" ${lockOtherFilters ? 'disabled' : ''}>Todos</button>
+                <button type="button" class="bid-filter-button bid-filter-button-secondary bid-filter-button-small" id="bid-country-select-none" ${lockOtherFilters ? 'disabled' : ''}>Ninguno</button>
+              </div>
+              <div class="bid-country-selector-options" role="group" aria-label="Selecci&oacute;n de pa&iacute;ses">
+                ${countryTagsMarkup}
+              </div>
+            </div>
+          </div>
+        ` : ''}
+
+        <div class="bid-projects-filter-row bid-projects-filter-row-primary">
+          <div class="bid-filter-group">
+            <label class="bid-filter-label" for="bid-project-name">Nombre del proyecto</label>
+            <input
+              id="bid-project-name"
+              class="bid-filter-input"
+              type="text"
+              value="${escapeHtmlAttr(state.filters.projectName)}"
+              placeholder="Buscar por texto libre"
+              ${lockOtherFilters ? 'disabled' : ''}
+            />
+          </div>
+        </div>
+
+        <div class="bid-projects-filter-row bid-projects-filter-row-number">
+          <div class="bid-filter-group bid-filter-group-number">
+            <label class="bid-filter-label" for="bid-project-number-input">N&uacute;mero de proyecto</label>
             <div class="bid-project-number-entry">
               <input
                 id="bid-project-number-input"
@@ -375,86 +546,69 @@ export function createBidProjectsController({ section, filtersEl, summaryEl, tab
               </datalist>
               <button type="button" class="bid-filter-button" id="bid-project-number-add">A&ntilde;adir</button>
             </div>
+            <div class="bid-project-number-box">
+              <div class="bid-project-chip-list">${selectedProjectsMarkup}</div>
+              <p class="bid-filter-help">Si seleccionas uno o varios proyectos, el resto de filtros se desactiva.</p>
+            </div>
           </div>
-          <p class="bid-filter-help">Si seleccionas uno o varios proyectos, el resto de filtros se desactiva.</p>
         </div>
 
-        <div class="bid-filter-group">
-          <label class="bid-filter-label" for="bid-project-name">Nombre del proyecto</label>
-          <input
-            id="bid-project-name"
-            class="bid-filter-input"
-            type="text"
-            value="${escapeHtmlAttr(state.filters.projectName)}"
-            placeholder="Buscar por texto libre"
-            ${lockOtherFilters ? 'disabled' : ''}
-          />
-        </div>
-
-        ${isRegionAggregate ? `
+        <div class="bid-projects-filter-row bid-projects-filter-row-secondary">
           <div class="bid-filter-group">
-            <label class="bid-filter-label" for="bid-project-country">Pa&iacute;s</label>
-            <select id="bid-project-country" class="bid-filter-select" ${lockOtherFilters ? 'disabled' : ''}>
+            <label class="bid-filter-label" for="bid-project-subsector">Subsector</label>
+            <select id="bid-project-subsector" class="bid-filter-select" ${lockOtherFilters ? 'disabled' : ''}>
               <option value="">Todos</option>
-              ${derived.countryOptions.map((option) => `
-                <option value="${escapeHtmlAttr(option.value)}" ${option.value === state.filters.country ? 'selected' : ''}>
-                  ${escapeHtml(option.value)}
+              ${derived.subsectorOptions.map((option) => `
+                <option value="${escapeHtmlAttr(option.value)}" ${option.value === state.filters.subsector ? 'selected' : ''}>
+                  ${escapeHtml(option.value)} (${escapeHtml(formatLocaleNumber(option.count, 0))})
                 </option>
               `).join('')}
             </select>
           </div>
-        ` : ''}
 
-        <div class="bid-filter-group">
-          <label class="bid-filter-label" for="bid-project-subsector">Subsector</label>
-          <select id="bid-project-subsector" class="bid-filter-select" ${lockOtherFilters ? 'disabled' : ''}>
-            <option value="">Todos</option>
-            ${derived.subsectorOptions.map((option) => `
-              <option value="${escapeHtmlAttr(option.value)}" ${option.value === state.filters.subsector ? 'selected' : ''}>
-                ${escapeHtml(option.value)} (${escapeHtml(formatLocaleNumber(option.count, 0))})
-              </option>
-            `).join('')}
-          </select>
+          <div class="bid-filter-group">
+            <label class="bid-filter-label" for="bid-project-status">Estado</label>
+            <select id="bid-project-status" class="bid-filter-select" ${lockOtherFilters ? 'disabled' : ''}>
+              <option value="">Todos</option>
+              ${derived.statusOptions.map((option) => `
+                <option value="${escapeHtmlAttr(option.value)}" ${option.value === state.filters.status ? 'selected' : ''}>
+                  ${escapeHtml(option.value)} (${escapeHtml(formatLocaleNumber(option.count, 0))})
+                </option>
+              `).join('')}
+            </select>
+          </div>
+
+          <div class="bid-filter-group bid-filter-group-toggle">
+            <span class="bid-filter-label">Actividad</span>
+            <label class="bid-projects-toggle bid-projects-toggle-inline">
+              <input id="bid-project-active-only" type="checkbox" ${state.filters.activeOnly ? 'checked' : ''} ${lockOtherFilters ? 'disabled' : ''} />
+              <span>Solo proyectos activos</span>
+            </label>
+          </div>
         </div>
 
-        <div class="bid-filter-group">
-          <label class="bid-filter-label" for="bid-project-status">Estado</label>
-          <select id="bid-project-status" class="bid-filter-select" ${lockOtherFilters ? 'disabled' : ''}>
-            <option value="">Todos</option>
-            ${derived.statusOptions.map((option) => `
-              <option value="${escapeHtmlAttr(option.value)}" ${option.value === state.filters.status ? 'selected' : ''}>
-                ${escapeHtml(option.value)} (${escapeHtml(formatLocaleNumber(option.count, 0))})
-              </option>
-            `).join('')}
-          </select>
-        </div>
-
-        <div class="bid-filter-group">
-          <label class="bid-filter-label" for="bid-project-quick-range">Fecha de aprobaci&oacute;n</label>
-          <select id="bid-project-quick-range" class="bid-filter-select" ${lockOtherFilters ? 'disabled' : ''}>
-            <option value="">Sin rango r&aacute;pido</option>
-            <option value="last7" ${state.filters.quickRange === 'last7' ? 'selected' : ''}>&Uacute;ltimos 7 d&iacute;as</option>
-            <option value="last30" ${state.filters.quickRange === 'last30' ? 'selected' : ''}>&Uacute;ltimos 30 d&iacute;as</option>
-            <option value="last365" ${state.filters.quickRange === 'last365' ? 'selected' : ''}>&Uacute;ltimo a&ntilde;o</option>
-          </select>
-        </div>
-
-        <div class="bid-filter-group">
-          <label class="bid-filter-label" for="bid-project-date-from">Desde</label>
-          <input id="bid-project-date-from" class="bid-filter-input" type="date" value="${escapeHtmlAttr(state.filters.dateFrom)}" ${lockOtherFilters ? 'disabled' : ''} />
-        </div>
-
-        <div class="bid-filter-group">
-          <label class="bid-filter-label" for="bid-project-date-to">Hasta</label>
-          <input id="bid-project-date-to" class="bid-filter-input" type="date" value="${escapeHtmlAttr(state.filters.dateTo)}" ${lockOtherFilters ? 'disabled' : ''} />
+        <div class="bid-projects-filter-row bid-projects-filter-row-dates">
+          <div class="bid-filter-group">
+            <label class="bid-filter-label">Fecha de aprobaci&oacute;n</label>
+            <select id="bid-project-quick-range" class="bid-filter-select" ${lockOtherFilters ? 'disabled' : ''}>
+              <option value="">Cualquiera</option>
+              <option value="last7" ${state.filters.quickRange === 'last7' ? 'selected' : ''}>&Uacute;ltimos 7 d&iacute;as</option>
+              <option value="last30" ${state.filters.quickRange === 'last30' ? 'selected' : ''}>&Uacute;ltimos 30 d&iacute;as</option>
+              <option value="last365" ${state.filters.quickRange === 'last365' ? 'selected' : ''}>&Uacute;ltimo a&ntilde;o</option>
+            </select>
+          </div>
+          <div class="bid-filter-group">
+            <label class="bid-filter-inline-label" for="bid-project-date-from">Desde</label>
+            <input id="bid-project-date-from" class="bid-filter-input" type="date" value="${escapeHtmlAttr(state.filters.dateFrom)}" ${lockOtherFilters ? 'disabled' : ''} />
+          </div>
+          <div class="bid-filter-group">
+            <label class="bid-filter-inline-label" for="bid-project-date-to">Hasta</label>
+            <input id="bid-project-date-to" class="bid-filter-input" type="date" value="${escapeHtmlAttr(state.filters.dateTo)}" ${lockOtherFilters ? 'disabled' : ''} />
+          </div>
         </div>
       </div>
 
       <div class="bid-projects-filter-actions">
-        <label class="bid-projects-toggle">
-          <input id="bid-project-active-only" type="checkbox" ${state.filters.activeOnly ? 'checked' : ''} ${lockOtherFilters ? 'disabled' : ''} />
-          <span>Solo proyectos activos</span>
-        </label>
         <button type="button" class="bid-filter-button bid-filter-button-secondary" id="bid-project-clear">Limpiar filtros</button>
       </div>
     `;
@@ -492,6 +646,15 @@ export function createBidProjectsController({ section, filtersEl, summaryEl, tab
     return `
       <div class="bid-projects-table-meta">
         <span>${escapeHtml(formatLocaleNumber(derived.filteredRows.length, 0))} resultados</span>
+        <label class="bid-projects-page-size">
+          <span>Mostrar</span>
+          <select id="bid-project-page-size" class="bid-filter-select">
+            ${[10, 25, 50, 100].map((size) => `
+              <option value="${size}" ${size === derived.pageSize ? 'selected' : ''}>${size}</option>
+            `).join('')}
+          </select>
+          <span>por p&aacute;gina</span>
+        </label>
         <span>P&aacute;gina ${escapeHtml(formatLocaleNumber(derived.page, 0))} de ${escapeHtml(formatLocaleNumber(derived.totalPages, 0))}</span>
       </div>
       <div class="bid-projects-table-wrap">
@@ -534,7 +697,9 @@ export function createBidProjectsController({ section, filtersEl, summaryEl, tab
     const projectNumberInput = filtersEl?.querySelector('#bid-project-number-input');
     const addProjectButton = filtersEl?.querySelector('#bid-project-number-add');
     const projectNameInput = filtersEl?.querySelector('#bid-project-name');
-    const countrySelect = filtersEl?.querySelector('#bid-project-country');
+    const countryToggleButtons = filtersEl?.querySelectorAll('[data-country-toggle]') || [];
+    const countrySelectAllButton = filtersEl?.querySelector('#bid-country-select-all');
+    const countrySelectNoneButton = filtersEl?.querySelector('#bid-country-select-none');
     const subsectorSelect = filtersEl?.querySelector('#bid-project-subsector');
     const statusSelect = filtersEl?.querySelector('#bid-project-status');
     const quickRangeSelect = filtersEl?.querySelector('#bid-project-quick-range');
@@ -542,6 +707,7 @@ export function createBidProjectsController({ section, filtersEl, summaryEl, tab
     const dateToInput = filtersEl?.querySelector('#bid-project-date-to');
     const activeOnlyInput = filtersEl?.querySelector('#bid-project-active-only');
     const clearButton = filtersEl?.querySelector('#bid-project-clear');
+    const pageSizeSelect = tableShellEl?.querySelector('#bid-project-page-size');
 
     function addProjectFromInput() {
       const value = normalizeText(projectNumberInput?.value);
@@ -552,6 +718,24 @@ export function createBidProjectsController({ section, filtersEl, summaryEl, tab
         state.filters.projectNumbers = [...state.filters.projectNumbers, match.oper_num];
       }
       state.filters.projectNumberQuery = '';
+      state.page = 1;
+      render();
+    }
+
+    function toggleCountryValue(value) {
+      const match = getCountryOptionByValue(value);
+      if (!match) return;
+
+      if (isCountryFilterAllActive()) {
+        state.filters.countries = getCountryOptions()
+          .map((option) => option.value)
+          .filter((optionValue) => optionValue !== match.value);
+      } else if (state.filters.countries.includes(match.value)) {
+        state.filters.countries = state.filters.countries.filter((entry) => entry !== match.value);
+      } else {
+        state.filters.countries = [...state.filters.countries, match.value];
+      }
+
       state.page = 1;
       render();
     }
@@ -584,8 +768,22 @@ export function createBidProjectsController({ section, filtersEl, summaryEl, tab
       render();
     });
 
-    countrySelect?.addEventListener('change', (event) => {
-      state.filters.country = event.target.value;
+    countryToggleButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const value = button.getAttribute('data-country-toggle');
+        if (!value) return;
+        toggleCountryValue(value);
+      });
+    });
+
+    countrySelectAllButton?.addEventListener('click', () => {
+      state.filters.countries = null;
+      state.page = 1;
+      render();
+    });
+
+    countrySelectNoneButton?.addEventListener('click', () => {
+      state.filters.countries = [];
       state.page = 1;
       render();
     });
@@ -633,6 +831,12 @@ export function createBidProjectsController({ section, filtersEl, summaryEl, tab
       render();
     });
 
+    pageSizeSelect?.addEventListener('change', (event) => {
+      state.pageSize = Number(event.target.value) || DEFAULT_PAGE_SIZE;
+      state.page = 1;
+      render();
+    });
+
     tableShellEl?.querySelectorAll('[data-sort-key]').forEach((button) => {
       button.addEventListener('click', () => {
         const key = button.getAttribute('data-sort-key');
@@ -659,6 +863,18 @@ export function createBidProjectsController({ section, filtersEl, summaryEl, tab
   }
 
   function render() {
+    if (subtitleEl) {
+      let place = '';
+      if (state.country?.name) {
+        place = normalizeText(state.country.name);
+      } else if (state.country?.isRegionAggregate) {
+        place = 'América Latina y el Caribe';
+      }
+      subtitleEl.textContent = place
+        ? `Operaciones de Modernización del Estado en ${place}`
+        : 'Operaciones de Modernización del Estado';
+    }
+
     renderLinks();
 
     if (!filtersEl || !summaryEl || !tableShellEl) return;

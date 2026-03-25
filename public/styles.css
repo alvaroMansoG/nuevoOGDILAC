@@ -685,6 +685,16 @@ html {
   text-decoration: none;
   transition: background-color .2s ease, color .2s ease, border-color .2s ease, transform .2s ease;
 }
+.banner-top-link {
+  justify-content: center;
+  width: 2.15rem;
+  padding-inline: 0;
+  font-size: 1rem;
+}
+.banner-top-icon {
+  line-height: 1;
+  font-weight: 800;
+}
 .banner-section-link:hover {
   background: rgba(0,78,112,.08);
   border-color: rgba(0,78,112,.18);
@@ -748,15 +758,46 @@ html {
   color: var(--text-muted);
   font-weight: 500;
 }
-#basic-section,
-#connectivity-section,
-#findex-section,
+#country-section,
 #enablers-section,
 #trust-section,
 #digital-guides-section,
 #gov-section,
 #bid-projects-section {
   scroll-margin-top: 1rem;
+}
+
+.country-section {
+  overflow: visible;
+}
+
+.country-subsections {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.country-subsection {
+  margin-bottom: 0;
+  padding: .9rem 1rem 1rem;
+  background: rgba(255,255,255,.84);
+  border-color: rgba(0,78,112,.1);
+  box-shadow: 0 8px 16px rgba(0,78,112,.05);
+  overflow: visible;
+}
+
+.country-subsection .section-header {
+  margin-bottom: .8rem;
+}
+
+.country-subsection .section-title {
+  font-size: 1rem;
+}
+
+.country-subsection .section-subtitle {
+  font-size: .7rem;
+  line-height: 1.25;
+  max-width: 52rem;
 }
 
 .section-toggle {
@@ -786,17 +827,23 @@ html {
 }
 
 .card-grid.is-collapsed > :not(.section-header),
-.gov-indices-section.is-collapsed > :not(.section-header) {
+.gov-indices-section.is-collapsed > :not(.section-header),
+.country-subsection.is-collapsed > :not(.section-header),
+.country-section.is-collapsed > :not(.section-header) {
   display: none !important;
 }
 
 .card-grid.is-collapsed .section-header,
-.gov-indices-section.is-collapsed .section-header {
+.gov-indices-section.is-collapsed .section-header,
+.country-subsection.is-collapsed .section-header,
+.country-section.is-collapsed .section-header {
   margin-bottom: 0;
 }
 
 .card-grid.is-collapsed,
-.gov-indices-section.is-collapsed {
+.gov-indices-section.is-collapsed,
+.country-subsection.is-collapsed,
+.country-section.is-collapsed {
   background: rgba(255,255,255,.84);
   border-color: rgba(0,78,112,.18);
   box-shadow: 0 10px 20px rgba(0,78,112,.05);
@@ -835,10 +882,45 @@ html {
   border: 1px solid rgba(0,78,112,.08);
 }
 
-.bid-projects-filter-grid {
+.bid-projects-filter-layout {
+  display: flex;
+  flex-direction: column;
+  gap: .95rem;
+}
+
+.bid-projects-filter-row {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: .9rem;
+}
+
+.bid-projects-filter-row-primary {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.bid-projects-filter-row-countries {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.bid-projects-filter-row-number {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.bid-projects-filter-row-secondary {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, .9fr);
+  align-items: start;
+}
+
+.bid-projects-filter-row-secondary-meta {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.bid-projects-filter-row-secondary-meta.is-aggregate {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.bid-projects-filter-row-dates {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
 }
 
 .bid-filter-group {
@@ -852,11 +934,87 @@ html {
   grid-column: 1 / -1;
 }
 
+.bid-filter-group-number,
+.bid-filter-group-dates,
+.bid-filter-group-country {
+  min-width: 0;
+}
+
+.bid-filter-group-toggle {
+  justify-content: flex-end;
+}
+
+.bid-filter-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: .75rem;
+}
+
+.bid-country-selector-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+
+.bid-country-option {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  min-height: 34px;
+  padding: .38rem .7rem;
+  border-radius: 999px;
+  font-size: .82rem;
+}
+
+.bid-country-option {
+  border: 1px solid rgba(0,78,112,.12);
+  background: #fff;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition), transform var(--transition);
+}
+
+.bid-country-option.is-active {
+  background: rgba(0,78,112,.14);
+  border-color: rgba(0,78,112,.24);
+  color: var(--bid-azul);
+}
+
+.bid-country-option:hover:not(:disabled) {
+  border-color: rgba(0,78,112,.24);
+  background: rgba(0,78,112,.04);
+  transform: translateY(-1px);
+}
+
+.bid-country-option:disabled {
+  cursor: not-allowed;
+}
+
+.bid-country-option-flag {
+  line-height: 1;
+}
+
+.bid-country-option-flag-img {
+  width: 18px;
+  height: 12px;
+  object-fit: cover;
+  border-radius: 2px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.14);
+  flex: 0 0 auto;
+}
+
 .bid-filter-label {
   font-size: .72rem;
   font-weight: 800;
   letter-spacing: .04em;
   text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.bid-filter-inline-label {
+  font-size: .78rem;
+  font-weight: 700;
   color: var(--text-secondary);
 }
 
@@ -894,7 +1052,7 @@ html {
 .bid-project-number-box {
   display: flex;
   flex-direction: column;
-  gap: .7rem;
+  gap: .45rem;
 }
 
 .bid-project-chip-list {
@@ -966,6 +1124,12 @@ html {
   background: rgba(0,78,112,.05);
 }
 
+.bid-filter-button-small {
+  min-height: 32px;
+  padding: .35rem .75rem;
+  font-size: .78rem;
+}
+
 .bid-projects-filter-actions {
   display: flex;
   align-items: center;
@@ -982,6 +1146,14 @@ html {
   color: var(--text-primary);
   font-size: .9rem;
   font-weight: 600;
+}
+
+.bid-projects-toggle-inline {
+  min-height: 42px;
+  padding: .7rem .85rem;
+  border: 1px solid rgba(0,78,112,.14);
+  border-radius: 12px;
+  background: #fff;
 }
 
 .bid-projects-summary {
@@ -1057,6 +1229,22 @@ html {
   font-size: .84rem;
   font-weight: 700;
   color: var(--text-secondary);
+}
+
+.bid-projects-page-size {
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+  color: var(--text-secondary);
+  font-size: .84rem;
+  font-weight: 700;
+}
+
+.bid-projects-page-size .bid-filter-select {
+  width: auto;
+  min-width: 84px;
+  min-height: 38px;
+  padding: .45rem .7rem;
 }
 
 .bid-projects-table-wrap {
@@ -1928,16 +2116,16 @@ html {
   letter-spacing: .04em;
   text-transform: uppercase;
 }
-#basic-section .card-value {
+.country-section .card-value {
   font-weight: 800;
 }
-#basic-section .card-main-copy .card-value {
+.country-section .card-main-copy .card-value {
   font-size: 28px;
 }
-#basic-section .card-main-copy .card-inline-prefix {
+.country-section .card-main-copy .card-inline-prefix {
   font-size: 28px;
 }
-#basic-section .card-meta-copy {
+.country-section .card-meta-copy {
   font-weight: 800;
 }
 .data-year-sep,
@@ -2256,9 +2444,17 @@ html {
     max-width: calc(100% - 7.4rem);
   }
   .card-value { font-size: 1.95rem; }
-  #basic-section .card-main-copy .card-value { font-size: 1.8rem; }
-  .bid-projects-filter-grid,
+  .country-section .card-main-copy .card-value { font-size: 1.8rem; }
+  .bid-projects-filter-row-secondary,
+  .bid-projects-filter-row-secondary-meta.is-aggregate,
+  .bid-projects-filter-row-dates,
   .bid-projects-summary {
+    grid-template-columns: 1fr;
+  }
+  .bid-project-number-entry,
+  .bid-projects-filter-actions,
+  .bid-projects-table-meta,
+  .bid-projects-pagination {
     grid-template-columns: 1fr;
   }
   .bid-project-number-entry,

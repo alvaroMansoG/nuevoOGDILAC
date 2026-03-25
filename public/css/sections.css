@@ -2068,3 +2068,242 @@ a:hover { color: var(--bid-azul); }
     padding: 0 .85rem .8rem;
   }
 }
+
+#national-strategies-section {
+  scroll-margin-top: 1rem;
+}
+
+.national-strategies-section {
+  padding: 0;
+  overflow: hidden;
+}
+
+.national-strategies-section .section-header {
+  margin-bottom: 0;
+  padding: 1rem 1.1rem;
+}
+
+.national-strategies-mockup {
+  padding: 1.1rem;
+  border-top: 1px solid rgba(0,78,112,.08);
+  background:
+    radial-gradient(circle at top left, rgba(25,104,188,.12), transparent 34%),
+    radial-gradient(circle at top right, rgba(111,184,229,.16), transparent 28%),
+    linear-gradient(180deg, #f6f9fd 0%, #eef4fa 100%);
+}
+
+.national-strategies-shell {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.national-strategies-feature {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  padding: 1.15rem 1.35rem 1.25rem;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #3d5680 0%, #47689a 45%, #32466a 100%);
+  color: #ffffff;
+  box-shadow: 0 14px 28px rgba(23, 40, 64, .16);
+}
+
+.national-strategies-feature::after {
+  content: '';
+  position: absolute;
+  inset: auto -60px -72px auto;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(111,184,229,.2) 0%, rgba(111,184,229,0) 70%);
+  pointer-events: none;
+}
+
+.national-strategies-feature-kicker {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.45rem;
+  margin-bottom: .5rem;
+  padding: .15rem .55rem;
+  border-radius: 999px;
+  background: rgba(255,255,255,.14);
+  font-size: .66rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.national-strategies-feature-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.national-strategies-feature-copy {
+  min-width: 0;
+  max-width: 72ch;
+}
+
+.national-strategies-feature-title {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.national-strategies-feature-years {
+  margin: .2rem 0 .55rem;
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  opacity: .82;
+}
+
+.national-strategies-feature-text {
+  margin: 0;
+  font-size: .92rem;
+  line-height: 1.55;
+  color: rgba(255,255,255,.88);
+}
+
+.national-strategies-feature-link {
+  flex-shrink: 0;
+  align-self: center;
+  padding: .52rem .9rem;
+  border-radius: 999px;
+  background: rgba(255,255,255,.14);
+  border: 1px solid rgba(255,255,255,.16);
+  color: #ffffff;
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: .02em;
+  white-space: nowrap;
+}
+
+.national-strategies-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.national-strategies-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 118px;
+  padding: .95rem 1rem 1rem;
+  border-radius: 14px;
+  background: rgba(255,255,255,.96);
+  border: 1px solid rgba(0,78,112,.08);
+  box-shadow: 0 10px 22px rgba(23, 40, 64, .08);
+  border-top: 4px solid var(--strategies-accent, #4b8fda);
+}
+
+.national-strategies-card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: .75rem;
+}
+
+.national-strategies-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.15rem;
+  height: 2.15rem;
+  border-radius: 10px;
+  background: rgba(75, 143, 218, .12);
+  color: var(--strategies-accent, #4b8fda);
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.national-strategies-card-title {
+  margin: 0 0 .18rem;
+  color: #132033;
+  font-size: .98rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.national-strategies-card-copy {
+  margin: 0;
+  color: #516174;
+  font-size: .76rem;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.national-strategies-status {
+  display: inline-flex;
+  align-self: flex-start;
+  margin-top: .85rem;
+  padding: .22rem .55rem;
+  border-radius: 999px;
+  background: rgba(74,143,220,.12);
+  color: #2f5e9a;
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.national-strategies-status.is-complete {
+  background: rgba(46,184,114,.12);
+  color: #2b7d50;
+}
+
+.national-strategies-card-blue {
+  --strategies-accent: #4b8fda;
+}
+
+.national-strategies-card-red {
+  --strategies-accent: #d95b6a;
+}
+
+.national-strategies-card-mint {
+  --strategies-accent: #4bb9a7;
+}
+
+.national-strategies-card-red .national-strategies-card-icon {
+  background: rgba(217, 91, 106, .12);
+}
+
+.national-strategies-card-mint .national-strategies-card-icon {
+  background: rgba(75, 185, 167, .12);
+}
+
+@media (max-width: 980px) {
+  .national-strategies-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .national-strategies-mockup {
+    padding: .9rem;
+  }
+
+  .national-strategies-feature {
+    padding: 1rem 1rem 1.05rem;
+  }
+
+  .national-strategies-feature-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .national-strategies-feature-title {
+    font-size: 1.2rem;
+  }
+
+  .national-strategies-card {
+    min-height: 112px;
+    padding: .9rem;
+  }
+}

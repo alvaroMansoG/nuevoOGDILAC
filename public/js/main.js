@@ -24,7 +24,6 @@ const indicatorsWrapper = $('#indicators-wrapper');
 const coreCards         = $('#core-cards');
 const digitalCards      = $('#digital-cards');
 const macroCards        = $('#macro-cards');
-const findexCards       = $('#findex-cards');
 const govCards          = $('#gov-cards');
 const countryInfo       = $('#country-info');
 const mapContainer      = $('#map-container');
@@ -40,11 +39,16 @@ const infoMetaBlock     = $('#info-meta-block');
 const infoRows          = $('#info-rows');
 const infoRegionFlags   = $('#info-region-flags');
 const mapRegionTrigger  = $('#map-region-trigger');
-const basicLinks        = $('#basic-links');
-const connectivityLinks = $('#connectivity-links');
-const findexLinks       = $('#findex-links');
+const countryMethodNote = $('#country-method-note');
+const countryDemographyMethodNote = $('#country-demography-method-note');
+const countryConnectivityMethodNote = $('#country-connectivity-method-note');
+const countryServicesMethodNote = $('#country-services-method-note');
+const countryDemographyLinks = $('#country-demography-links');
+const countryConnectivityLinks = $('#country-connectivity-links');
+const countryServicesLinks = $('#country-services-links');
 const digitalEnablersEl = $('#digital-enablers');
 const enablersSection   = $('#enablers-section');
+const nationalStrategiesSection = $('#national-strategies-section');
 const trustSection      = $('#trust-section');
 const trustSummary      = $('#trust-summary');
 const trustProvidersEl  = $('#trust-providers');
@@ -54,9 +58,6 @@ const bidProjectsFilters = $('#bid-projects-filters');
 const bidProjectsSummary = $('#bid-projects-summary');
 const bidProjectsTableShell = $('#bid-projects-table-shell');
 const bidProjectsLinks = $('#bid-projects-links');
-const basicMethodNote   = $('#basic-method-note');
-const connectivityMethodNote = $('#connectivity-method-note');
-const findexMethodNote  = $('#findex-method-note');
 const govMethodNote     = $('#gov-method-note');
 const dimensionsMethodNote = $('#dimensions-method-note');
 const govRadarNote = $('#gov-radar-note');
@@ -78,10 +79,12 @@ let govSelectedYears = {};
 let govChartView = 'comparison';
 let countryLoadRequestId = 0;
 let sectionCollapseState = {
-  basic: false,
-  connectivity: false,
-  findex: false,
+  country: false,
+  countryDemography: false,
+  countryConnectivity: false,
+  countryServices: false,
   enablers: false,
+  nationalStrategies: false,
   trust: false,
   guides: false,
   gov: false,
@@ -90,10 +93,12 @@ let sectionCollapseState = {
 let enablerDimensionCollapseState = {};
 
 const COLLAPSIBLE_SECTION_IDS = {
-  basic: 'basic-section',
-  connectivity: 'connectivity-section',
-  findex: 'findex-section',
+  country: 'country-section',
+  countryDemography: 'country-demography-section',
+  countryConnectivity: 'country-connectivity-section',
+  countryServices: 'country-services-section',
   enablers: 'enablers-section',
+  nationalStrategies: 'national-strategies-section',
   trust: 'trust-section',
   guides: 'digital-guides-section',
   gov: 'gov-section',
@@ -120,9 +125,9 @@ const REGION_OPTION = {
 };
 
 const REGION_SECTION_NOTES = {
-  basic: 'Nota metodol\u00F3gica: suma para totales, promedio ponderado para desempleo y promedio simple para Gini. El IDH usa el dato oficial del PNUD para ALC.',
-  connectivity: 'Nota metodol\u00F3gica: promedios ponderados por poblaci\u00F3n para todos los indicadores de conectividad.',
-  findex: 'Nota metodol\u00F3gica: suma para exportaciones digitales y patentes TIC; promedio ponderado por poblaci\u00F3n para Findex y STEM.',
+  countryDemography: 'Nota metodol\u00F3gica: suma para totales, promedio ponderado para desempleo y promedio simple para Gini. El IDH usa el dato oficial del PNUD para ALC.',
+  countryConnectivity: 'Nota metodol\u00F3gica: promedios ponderados por poblaci\u00F3n para todos los indicadores de conectividad.',
+  countryServices: 'Nota metodol\u00F3gica: suma para exportaciones digitales y patentes TIC; promedio ponderado por poblaci\u00F3n para Findex y STEM.',
   gov: 'Nota metodol\u00F3gica: se muestran promedios regionales de los \u00EDndices y sub\u00EDndices disponibles para los 26 pa\u00EDses.',
   dimensions: 'Nota metodol\u00F3gica: cada dimensi\u00F3n muestra el promedio regional del sub\u00EDndice correspondiente.',
 };
@@ -1216,6 +1221,18 @@ function renderDigitalEnablers(data) {
   });
 }
 
+function renderNationalStrategiesSection(data) {
+  if (!nationalStrategiesSection) return;
+
+  const navLink = document.querySelector('.banner-section-link[data-section-key="nationalStrategies"]');
+  const isRegionAggregate = Boolean(data.country?.isRegionAggregate);
+
+  nationalStrategiesSection.style.display = isRegionAggregate ? 'none' : '';
+  if (navLink) {
+    navLink.classList.toggle('hidden', isRegionAggregate);
+  }
+}
+
 function formatTrustProviderCount(count) {
   const safeCount = Number.isFinite(Number(count)) ? Number(count) : 0;
   return `${formatLocaleNumber(safeCount, 0)} ${safeCount === 1 ? 'proveedor' : 'proveedores'}`;
@@ -1310,15 +1327,14 @@ function renderTrustProviders(data) {
 // â”€â”€â”€ Render indicators â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // â”€â”€â”€ Render indicators â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderIndicators(data) {
-  const containers = { 
-    basic: document.getElementById('basic-cards'), 
-    connectivity: document.getElementById('connectivity-cards'), 
-    findex: document.getElementById('findex-cards') 
+  const containers = {
+    demography: document.getElementById('country-demography-cards'),
+    connectivity: document.getElementById('country-connectivity-cards'),
+    services: document.getElementById('country-services-cards'),
   };
-  Object.values(containers).forEach(c => { if(c) c.innerHTML = ''; });
-  
-  if (document.getElementById('basic-section')) document.getElementById('basic-section').style.display = 'block';
-  if (document.getElementById('connectivity-section')) document.getElementById('connectivity-section').style.display = 'block';
+  Object.values(containers).forEach((container) => {
+    if (container) container.innerHTML = '';
+  });
 
   CONNECTIVITY_CARD_GROUPS.forEach((group) => {
     const metrics = group.keys
@@ -1341,8 +1357,8 @@ function renderIndicators(data) {
       .map(key => data.indicators[key])
       .filter(Boolean);
 
-    if (metrics.length && containers.findex) {
-      containers.findex.appendChild(createCompoundCard({
+    if (metrics.length && containers.services) {
+      containers.services.appendChild(createCompoundCard({
         title: group.title,
         icon: group.icon,
         metrics,
@@ -1356,11 +1372,11 @@ function renderIndicators(data) {
   for (const [, indicator] of Object.entries(data.indicators)) {
     if (indicator.category === 'connectivity' || indicator.category === 'findex') continue;
     if (indicator.embeddedIn) continue;
-    const container = containers[indicator.category];
+    const container = containers.demography;
     if (container) container.appendChild(createCard(indicator, data.country, data.indicators));
   }
 
-  if (basicLinks) {
+  if (countryDemographyLinks) {
     const iso3 = data.country?.iso3 || '';
     const isRegionAggregate = Boolean(data.country?.isRegionAggregate);
     const worldBankSlug = WORLD_BANK_COUNTRY_SLUGS[iso3] || '';
@@ -1371,7 +1387,7 @@ function renderIndicators(data) {
       ? `https://hdr.undp.org/data-center/specific-country-data#/countries/${iso3}`
       : 'https://hdr.undp.org/data-center/specific-country-data';
 
-    basicLinks.innerHTML = `
+    countryDemographyLinks.innerHTML = `
       <span>Fuente:</span>
       <a href="${worldBankUrl}" target="_blank" rel="noopener noreferrer">Banco Mundial</a>
       <span>&middot;</span>
@@ -1379,23 +1395,23 @@ function renderIndicators(data) {
     `;
   }
 
-  if (connectivityLinks) {
+  if (countryConnectivityLinks) {
     const iso3 = data.country?.iso3 || '';
     const connectivityUrl = iso3 && !data.country?.isRegionAggregate
       ? `https://data360.worldbank.org/en/dataset/ITU_DH?country=${iso3}`
       : 'https://data360.worldbank.org/en/dataset/ITU_DH';
 
-    connectivityLinks.innerHTML = `
+    countryConnectivityLinks.innerHTML = `
       <span>Fuente:</span>
       <a href="${connectivityUrl}" target="_blank" rel="noopener noreferrer">ITU via Banco Mundial</a>
     `;
   }
 
-  if (findexLinks) {
+  if (countryServicesLinks) {
     const iso3 = data.country?.iso3 || '';
     const suffix = iso3 && !data.country?.isRegionAggregate ? `?country=${iso3}` : '';
 
-    findexLinks.innerHTML = `
+    countryServicesLinks.innerHTML = `
       <span>Fuente:</span>
       <a href="https://data360.worldbank.org/en/dataset/WB_FINDEX" target="_blank" rel="noopener noreferrer">Global Findex</a>
       <span>&middot;</span>
@@ -1408,6 +1424,7 @@ function renderIndicators(data) {
   }
 
   renderDigitalEnablers(data);
+  renderNationalStrategiesSection(data);
   renderTrustProviders(data);
 }
 
@@ -2279,6 +2296,8 @@ async function loadCountry(iso) {
   if (!iso) return;
   const requestId = ++countryLoadRequestId;
   selectedIso = iso;
+  const mainScroller = document.getElementById('main-content');
+  const preservedScrollTop = mainScroller ? mainScroller.scrollTop : window.scrollY;
 
   // Sync dropdown
   selectEl.value = iso;
@@ -2326,6 +2345,12 @@ async function loadCountry(iso) {
     } else {
       console.error(bidProjectsResult.error);
       bidProjectsController.setError('No se pudieron cargar los proyectos BID.', data.country);
+    }
+
+    if (mainScroller) {
+      mainScroller.scrollTop = preservedScrollTop;
+    } else {
+      window.scrollTo({ top: preservedScrollTop, behavior: 'auto' });
     }
   } catch (err) {
     if (requestId !== countryLoadRequestId) return;
@@ -2581,9 +2606,10 @@ function getIndicatorTooltip(indicator) {
 function updateRegionalMethodNotes(country) {
   const isRegionAggregate = Boolean(country?.isRegionAggregate);
   const entries = [
-    [basicMethodNote, REGION_SECTION_NOTES.basic],
-    [connectivityMethodNote, REGION_SECTION_NOTES.connectivity],
-    [findexMethodNote, REGION_SECTION_NOTES.findex],
+    [countryMethodNote, ''],
+    [countryDemographyMethodNote, REGION_SECTION_NOTES.countryDemography],
+    [countryConnectivityMethodNote, REGION_SECTION_NOTES.countryConnectivity],
+    [countryServicesMethodNote, REGION_SECTION_NOTES.countryServices],
     [govMethodNote, REGION_SECTION_NOTES.gov],
     [dimensionsMethodNote, REGION_SECTION_NOTES.dimensions],
   ];
@@ -2591,8 +2617,9 @@ function updateRegionalMethodNotes(country) {
   entries.forEach(([el, text]) => {
     if (!el) return;
     el.textContent = text;
-      el.classList.toggle('hidden', !isRegionAggregate);
-    });
+    const show = Boolean(text) && isRegionAggregate;
+    el.classList.toggle('hidden', !show);
+  });
 }
 
 function getCollapsibleSectionElement(key) {
@@ -2638,6 +2665,32 @@ function expandSectionForNavigation(key) {
   }
 }
 
+function scrollSectionHeaderIntoView(target) {
+  if (!target) return;
+  const header = target.querySelector('.section-header') || target;
+  const mainHeaderEl = document.getElementById('main-header');
+  const topNavEl = document.querySelector('.top-section-nav');
+  const scroller = document.getElementById('main-content');
+  const stickyOffset = (mainHeaderEl?.offsetHeight || 0) + (topNavEl?.offsetHeight || 0) + 12;
+  const top = scroller
+    ? Math.max(0, scroller.scrollTop + header.getBoundingClientRect().top - scroller.getBoundingClientRect().top - stickyOffset)
+    : Math.max(0, window.scrollY + header.getBoundingClientRect().top - stickyOffset);
+  if (scroller) {
+    scroller.scrollTo({ top, behavior: 'smooth' });
+  } else {
+    window.scrollTo({ top, behavior: 'smooth' });
+  }
+}
+
+function scrollToPageTop() {
+  const scroller = document.getElementById('main-content');
+  if (scroller) {
+    scroller.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 function setupSectionCollapseUi() {
   sectionToggleButtons.forEach((button) => {
     button.addEventListener('click', () => {
@@ -2652,11 +2705,15 @@ function setupSectionCollapseUi() {
       const href = link.getAttribute('href');
       const key = link.dataset.sectionKey;
       const target = href ? document.querySelector(href) : null;
-      if (!href || !target) return;
       event.preventDefault();
+      if (key === 'top') {
+        scrollToPageTop();
+        return;
+      }
+      if (!href || !target) return;
       expandSectionForNavigation(key);
       requestAnimationFrame(() => {
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        scrollSectionHeaderIntoView(target);
       });
     });
   });
