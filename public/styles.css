@@ -714,8 +714,29 @@ html {
 
 /* ── Indicator sections ── */
 .indicators-wrapper { padding: 1.5rem 1.25rem 3rem; animation: slideUp .5s ease-out; }
-.card-grid { margin-bottom: 2.75rem; }
-.section-header { margin-bottom: 1.2rem; }
+.card-grid,
+.gov-indices-section {
+  margin-bottom: 2.75rem;
+  background: rgba(255,255,255,.72);
+  border: 1px solid rgba(0,78,112,.12);
+  border-radius: 18px;
+  box-shadow: 0 8px 22px rgba(0,78,112,.06);
+  padding: 1rem 1.1rem 1.15rem;
+}
+.section-header {
+  margin-bottom: 1.2rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: .2rem;
+}
+.section-heading {
+  display: flex;
+  flex-direction: column;
+  gap: .2rem;
+  min-width: 0;
+}
 .section-title {
   font-size: 1.25rem;
   font-weight: 700;
@@ -732,6 +753,53 @@ html {
 #findex-section,
 #gov-section {
   scroll-margin-top: 1rem;
+}
+
+.section-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .5rem .75rem;
+  border: 1px solid rgba(0,78,112,.16);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--bid-azul);
+  font-size: .8rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0,78,112,.08);
+  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition), background var(--transition);
+}
+.section-toggle:hover {
+  transform: translateY(-1px);
+  border-color: rgba(0,78,112,.24);
+  box-shadow: 0 6px 14px rgba(0,78,112,.1);
+}
+.section-toggle-icon {
+  font-size: .9rem;
+  line-height: 1;
+}
+
+.card-grid.is-collapsed > :not(.section-header),
+.gov-indices-section.is-collapsed > :not(.section-header) {
+  display: none !important;
+}
+
+.card-grid.is-collapsed .section-header,
+.gov-indices-section.is-collapsed .section-header {
+  margin-bottom: 0;
+}
+
+.card-grid.is-collapsed,
+.gov-indices-section.is-collapsed {
+  background: rgba(255,255,255,.84);
+  border-color: rgba(0,78,112,.18);
+  box-shadow: 0 10px 20px rgba(0,78,112,.05);
+}
+
+.gov-dimensions-section.is-linked-collapsed {
+  display: none !important;
 }
 
 .section-links {
@@ -1242,9 +1310,6 @@ html {
 /* ════════════════════════════════════════
    E-Gov Indices Section
    ════════════════════════════════════════ */
-.gov-indices-section {
-  margin-bottom: 2rem;
-}
 .gov-layout {
   display: flex;
   flex-direction: column; /* Radar on top */

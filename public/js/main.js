@@ -49,6 +49,8 @@ const govRadarNote = $('#gov-radar-note');
 const dimRadarNote = $('#dim-radar-note');
 const govChartTitle = $('#gov-chart-title');
 const govChartToggle = $('#gov-chart-toggle');
+const sectionToggleButtons = $$('.section-toggle');
+const sectionNavLinks = $$('.banner-section-link[data-section-key]');
 
 // State
 let countries = [];
@@ -59,8 +61,21 @@ let _dimRadarChart = null;
 let activeDimIndex = 'egdi';
 let govSelectedYears = {};
 let govChartView = 'comparison';
+let sectionCollapseState = {
+  basic: false,
+  connectivity: false,
+  findex: false,
+  gov: false,
+};
 
-const INCOME_LEVEL_TOOLTIP = 'ClasificaciÃ³n del Banco Mundial segÃºn el ingreso nacional bruto per cÃ¡pita del paÃ­s. Fuente: metadata oficial de paÃ­s del Banco Mundial.';
+const COLLAPSIBLE_SECTION_IDS = {
+  basic: 'basic-section',
+  connectivity: 'connectivity-section',
+  findex: 'findex-section',
+  gov: 'gov-section',
+};
+
+const INCOME_LEVEL_TOOLTIP = 'Clasificaci\u00F3n del Banco Mundial seg\u00FAn el ingreso nacional bruto per c\u00E1pita del pa\u00EDs. Fuente: metadata oficial de pa\u00EDs del Banco Mundial.';
 
 // Numeric ID â†’ ISO3 mapping (built from server data)
 const REGION_AGGREGATE_ISO = 'ALC';
@@ -150,7 +165,7 @@ const CONNECTIVITY_CARD_GROUPS = [
     keys: ['mobileSubs', 'broadband'],
   },
   {
-    title: 'Cobertura mÃ³vil',
+    title: 'Cobertura m\u00F3vil',
     icon: '\uD83D\uDCF6',
     keys: ['coverage5g', 'coverage4g', 'coverage3g'],
   },
@@ -174,24 +189,24 @@ const ECONOMY_TALENT_CARD_GROUPS = [
   },
 ];
 const INDICATOR_TOOLTIPS = {
-  'SP.POP.TOTL': 'PoblaciÃ³n total residente estimada a mitad de aÃ±o, sin importar la situaciÃ³n legal o la ciudadanÃ­a.',
-  'SL.TLF.TOTL.IN': 'Personas de 15 aÃ±os o mÃ¡s que aportan trabajo para producir bienes y servicios; incluye ocupadas y desocupadas que buscan empleo.',
-  'SL.UEM.TOTL.ZS': 'Porcentaje de la fuerza laboral que no tiene trabajo, pero estÃ¡ disponible y lo busca activamente.',
-  'NY.GDP.MKTP.CD': 'Valor total de los bienes y servicios producidos en la economÃ­a durante el perÃ­odo, expresado en dÃ³lares corrientes de Estados Unidos.',
-  'NY.GDP.PCAP.CD': 'PIB en dÃ³lares corrientes dividido entre la poblaciÃ³n total.',
-  'NY.GDP.MKTP.KD.ZG': 'VariaciÃ³n porcentual anual del PIB a precios constantes.',
-  'UNDP.HDI': 'Ãndice compuesto del PNUD que resume logros medios en salud, educaciÃ³n e ingreso.',
-  'SI.POV.GINI': 'Mide cuÃ¡nto se desvÃ­a la distribuciÃ³n del ingreso o del consumo de la igualdad perfecta. Un valor de 0 representa igualdad total y 100 desigualdad total.',
-  'ITU_DH_INT_USER_PT': 'Porcentaje de personas que usaron Internet desde cualquier lugar y dispositivo durante los Ãºltimos tres meses.',
+  'SP.POP.TOTL': 'Poblaci\u00F3n total residente estimada a mitad de a\u00F1o, sin importar la situaci\u00F3n legal o la ciudadan\u00EDa.',
+  'SL.TLF.TOTL.IN': 'Personas de 15 a\u00F1os o m\u00E1s que aportan trabajo para producir bienes y servicios; incluye ocupadas y desocupadas que buscan empleo.',
+  'SL.UEM.TOTL.ZS': 'Porcentaje de la fuerza laboral que no tiene trabajo, pero est\u00E1 disponible y lo busca activamente.',
+  'NY.GDP.MKTP.CD': 'Valor total de los bienes y servicios producidos en la econom\u00EDa durante el per\u00EDodo, expresado en d\u00F3lares corrientes de Estados Unidos.',
+  'NY.GDP.PCAP.CD': 'PIB en d\u00F3lares corrientes dividido entre la poblaci\u00F3n total.',
+  'NY.GDP.MKTP.KD.ZG': 'Variaci\u00F3n porcentual anual del PIB a precios constantes.',
+  'UNDP.HDI': '\u00CDndice compuesto del PNUD que resume logros medios en salud, educaci\u00F3n e ingreso.',
+  'SI.POV.GINI': 'Mide cu\u00E1nto se desv\u00EDa la distribuci\u00F3n del ingreso o del consumo de la igualdad perfecta. Un valor de 0 representa igualdad total y 100 desigualdad total.',
+  'ITU_DH_INT_USER_PT': 'Porcentaje de personas que usaron Internet desde cualquier lugar y dispositivo durante los \u00FAltimos tres meses.',
   'ITU_DH_HH_INT': 'Porcentaje de hogares con acceso a Internet en el hogar.',
-  'ITU_DH_MOB_SUB_PER_100': 'NÃºmero de suscripciones mÃ³viles celulares activas por cada 100 habitantes.',
+  'ITU_DH_MOB_SUB_PER_100': 'N\u00FAmero de suscripciones m\u00F3viles celulares activas por cada 100 habitantes.',
   'IT.NET.BBND.P2': 'Suscripciones fijas de banda ancha por cada 100 personas, incluyendo accesos de alta velocidad a Internet por redes fijas.',
-  'ITU_DH_POP_COV_5G': 'Porcentaje de la poblaciÃ³n que vive dentro del alcance de una seÃ±al mÃ³vil 5G, tenga o no una suscripciÃ³n activa.',
-  'ITU_DH_POP_COV_4G': 'Porcentaje de la poblaciÃ³n que vive dentro del alcance de una seÃ±al mÃ³vil 4G, tenga o no una suscripciÃ³n activa.',
-  'ITU_DH_POP_COV_3G': 'Porcentaje de la poblaciÃ³n que vive dentro del alcance de una seÃ±al mÃ³vil 3G, tenga o no una suscripciÃ³n activa.',
-  FIN26B: 'Porcentaje de adultos que usaron un mÃ³vil o Internet para comprar algo en lÃ­nea.',
-  FIN27A: 'Porcentaje de adultos que usaron un mÃ³vil o Internet para pagar una compra en lÃ­nea.',
-  FIN9B: 'Porcentaje de adultos que usaron un mÃ³vil o Internet para consultar el saldo de una cuenta financiera.',
+  'ITU_DH_POP_COV_5G': 'Porcentaje de la poblaci\u00F3n que vive dentro del alcance de una se\u00F1al m\u00F3vil 5G, tenga o no una suscripci\u00F3n activa.',
+  'ITU_DH_POP_COV_4G': 'Porcentaje de la poblaci\u00F3n que vive dentro del alcance de una se\u00F1al m\u00F3vil 4G, tenga o no una suscripci\u00F3n activa.',
+  'ITU_DH_POP_COV_3G': 'Porcentaje de la poblaci\u00F3n que vive dentro del alcance de una se\u00F1al m\u00F3vil 3G, tenga o no una suscripci\u00F3n activa.',
+  FIN26B: 'Porcentaje de adultos que usaron un m\u00F3vil o Internet para comprar algo en l\u00EDnea.',
+  FIN27A: 'Porcentaje de adultos que usaron un m\u00F3vil o Internet para pagar una compra en l\u00EDnea.',
+  FIN9B: 'Porcentaje de adultos que usaron un m\u00F3vil o Internet para consultar el saldo de una cuenta financiera.',
   'g20.made': 'Porcentaje de adultos que realizaron al menos un pago digital.',
   'g20.received': 'Porcentaje de adultos que recibieron al menos un pago digital.',
   'UNCTAD_DE_DIG_SERVTRADE_ANN_EXP': 'Valor de las exportaciones internacionales de servicios entregables digitalmente, expresado en millones de d\u00F3lares estadounidenses.',
@@ -1247,14 +1262,14 @@ function getGovOrgBadge(clsKey, org) {
 
 function getGovOrgTooltip(clsKey, org) {
   const map = {
-    egdi: 'Ãndice elaborado por Naciones Unidas.',
-    gtmi: 'Ãndice elaborado por el Banco Mundial.',
-    gci: 'Ãndice elaborado por la UniÃ³n Internacional de Telecomunicaciones.',
-    ocde: 'Ãndice de referencia BID/OCDE para gobierno digital.',
-    ai: 'Ãndice elaborado por Oxford Insights.',
-    nri: 'Ãndice elaborado por Portulans Institute.',
+    egdi: '\u00CDndice elaborado por Naciones Unidas.',
+    gtmi: '\u00CDndice elaborado por el Banco Mundial.',
+    gci: '\u00CDndice elaborado por la Uni\u00F3n Internacional de Telecomunicaciones.',
+    ocde: '\u00CDndice de referencia BID/OCDE para gobierno digital.',
+    ai: '\u00CDndice elaborado por Oxford Insights.',
+    nri: '\u00CDndice elaborado por Portulans Institute.',
   };
-  return map[clsKey] || `Ãndice elaborado por ${org}.`;
+  return map[clsKey] || `\u00CDndice elaborado por ${org}.`;
 }
 
 function hexToRgba(hex, alpha = 1) {
@@ -1307,11 +1322,11 @@ function getGovGroupLabel(clsKey, value) {
   }
   if (clsKey === 'gtmi') {
     const text = String(value);
-    return text.includes('Â·') ? text.split('Â·')[0].trim() : text;
+    return text.includes('·') ? text.split('·')[0].trim() : text;
   }
   if (clsKey === 'gci') {
     const text = String(value);
-    return text.includes('Â·') ? text.split('Â·')[0].trim() : text;
+    return text.includes('·') ? text.split('·')[0].trim() : text;
   }
   return value;
 }
@@ -1319,17 +1334,17 @@ function getGovGroupLabel(clsKey, value) {
 function getGovGroupTooltip(clsKey, value) {
   const meta = getGovGroupMeta(clsKey, value);
   if (meta) return meta.tooltip;
-  if (!value) return 'No hay grupo disponible para este Ã­ndice.';
+  if (!value) return 'No hay grupo disponible para este \u00EDndice.';
   if (clsKey === 'egdi') {
-    return 'ClasificaciÃ³n EGDI: VHEGDI = Muy alto, HEGDI = Alto, MEGDI = Medio, LEGDI = Bajo.';
+    return 'Clasificaci\u00F3n EGDI: VHEGDI = Muy alto, HEGDI = Alto, MEGDI = Medio, LEGDI = Bajo.';
   }
   if (clsKey === 'gtmi') {
-    return `ClasificaciÃ³n GTMI reportada por el Banco Mundial: ${value}.`;
+    return `Clasificaci\u00F3n GTMI reportada por el Banco Mundial: ${value}.`;
   }
   if (clsKey === 'gci') {
-    return `CategorÃ­a del GCI: ${value}.`;
+    return `Categor\u00EDa del GCI: ${value}.`;
   }
-  return `ClasificaciÃ³n reportada por el Ã­ndice: ${value}.`;
+  return `Clasificaci\u00F3n reportada por el \u00EDndice: ${value}.`;
 }
 
 function formatGovRank(rank, withMedal = false) {
@@ -2249,6 +2264,7 @@ function highlightCountry(iso) {
 
 async function init() {
   try {
+    setupSectionCollapseUi();
     countries = await fetchCountries();
 
     countries.forEach(c => {
@@ -2315,8 +2331,77 @@ function updateRegionalMethodNotes(country) {
   entries.forEach(([el, text]) => {
     if (!el) return;
     el.textContent = text;
-    el.classList.toggle('hidden', !isRegionAggregate);
+      el.classList.toggle('hidden', !isRegionAggregate);
+    });
+}
+
+function getCollapsibleSectionElement(key) {
+  return document.getElementById(COLLAPSIBLE_SECTION_IDS[key] || '');
+}
+
+function getLinkedSectionElement(key) {
+  return key === 'gov' ? document.getElementById('gov-dimensions-section') : null;
+}
+
+function syncSectionToggleUi(key) {
+  const button = document.querySelector(`.section-toggle[data-section-key="${key}"]`);
+  if (!button) return;
+  const collapsed = Boolean(sectionCollapseState[key]);
+  button.setAttribute('aria-expanded', String(!collapsed));
+  const text = button.querySelector('.section-toggle-text');
+  const icon = button.querySelector('.section-toggle-icon');
+  if (text) text.textContent = collapsed ? 'Mostrar' : 'Ocultar';
+  if (icon) icon.textContent = collapsed ? '\u25BE' : '\u25B4';
+}
+
+function applySectionCollapseState(key) {
+  const collapsed = Boolean(sectionCollapseState[key]);
+  const section = getCollapsibleSectionElement(key);
+  const linked = getLinkedSectionElement(key);
+  if (section) {
+    section.classList.toggle('is-collapsed', collapsed);
+  }
+  if (linked) {
+    linked.classList.toggle('is-linked-collapsed', collapsed);
+  }
+  syncSectionToggleUi(key);
+}
+
+function setSectionCollapsed(key, collapsed) {
+  sectionCollapseState[key] = Boolean(collapsed);
+  applySectionCollapseState(key);
+}
+
+function expandSectionForNavigation(key) {
+  if (key && sectionCollapseState[key]) {
+    setSectionCollapsed(key, false);
+  }
+}
+
+function setupSectionCollapseUi() {
+  sectionToggleButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const key = button.dataset.sectionKey;
+      if (!key) return;
+      setSectionCollapsed(key, !sectionCollapseState[key]);
+    });
   });
+
+  sectionNavLinks.forEach((link) => {
+    link.addEventListener('click', (event) => {
+      const href = link.getAttribute('href');
+      const key = link.dataset.sectionKey;
+      const target = href ? document.querySelector(href) : null;
+      if (!href || !target) return;
+      event.preventDefault();
+      expandSectionForNavigation(key);
+      requestAnimationFrame(() => {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+  });
+
+  Object.keys(sectionCollapseState).forEach((key) => applySectionCollapseState(key));
 }
 
 function getGovMethodTooltip(clsKey, countryIso, year = null) {

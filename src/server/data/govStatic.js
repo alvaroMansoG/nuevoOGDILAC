@@ -39,11 +39,11 @@ function getEgdiGroup(score) {
 
 // â”€â”€â”€ GCI tier derivation (ITU 2024) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const GCI_TIER_LABELS = {
-  T1: 'Tier 1 Â· Rol Modelo',
-  T2: 'Tier 2 Â· Avanzado',
-  T3: 'Tier 3 Â· En desarrollo',
-  T4: 'Tier 4 Â· Estableciendo capacidades',
-  T5: 'Tier 5 Â· Inicial',
+  T1: 'Tier 1 · Rol Modelo',
+  T2: 'Tier 2 · Avanzado',
+  T3: 'Tier 3 · En desarrollo',
+  T4: 'Tier 4 · Estableciendo capacidades',
+  T5: 'Tier 5 · Inicial',
 };
 function getGciTier(score) {
   if (score == null) return null;
@@ -55,7 +55,7 @@ function getGciTier(score) {
 }
 
 // â”€â”€â”€ GTMI group description â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-const GTMI_GROUP_LABELS = { A: 'Grupo A Â· LÃ­der GovTech', B: 'Grupo B Â· Foco Significativo', C: 'Grupo C Â· Foco Emergente', D: 'Grupo D Â· Inicio' };
+const GTMI_GROUP_LABELS = { A: 'Grupo A · Líder GovTech', B: 'Grupo B · Foco Significativo', C: 'Grupo C · Foco Emergente', D: 'Grupo D · Inicio' };
 
 // â”€â”€â”€ ALC stats computed at startup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const ALC_ISO_LIST = Object.keys(GOV_DATA);
