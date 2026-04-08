@@ -1,0 +1,14 @@
+---
+description: Visual quality and art direction rules for OGDILAC
+globs: public/**/*.html, public/css/**/*.css, public/js/**/*.js
+alwaysApply: true
+---
+
+For all UI work:
+- prioritize premium art direction over generic layouts
+- improve hierarchy, spacing, composition, and depth
+- preserve canonical country-page structure
+- use the Framer wireframe as shell/style reference
+- aim for a modern institutional IADB/BID-like feel
+- keep the UI elegant, data-friendly, and high-trust
+- avoid flat, generic, low-contrast, weak visual solutions

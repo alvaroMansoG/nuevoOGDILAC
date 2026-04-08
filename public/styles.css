@@ -11,8 +11,8 @@ html {
 }
 .app-layout {
   display: flex;
-  height: 100vh;
-  width: 100vw;
+  height: calc(100vh - 40px);
+  width: 100%;
 }
 
 /* ============================================
@@ -85,8 +85,8 @@ html {
 /* ── Map ── */
 .map-container {
   flex-shrink: 0;
-  padding: .5rem;
-  min-height: 300px;
+  padding: 0.2rem 0.25rem;
+  min-height: 0;
   position: relative;
 }
 .map-container svg {
@@ -96,8 +96,8 @@ html {
 }
 .map-region-trigger {
   position: absolute;
-  top: .9rem;
-  right: .9rem;
+  top: 0.45rem;
+  right: 0.45rem;
   z-index: 2;
   display: inline-flex;
   align-items: center;
@@ -134,7 +134,7 @@ html {
   align-items: center;
   justify-content: center;
   gap: .5rem;
-  min-height: 360px;
+  min-height: 200px;
   color: var(--text-muted);
   font-size: .85rem;
 }
@@ -364,9 +364,9 @@ html {
   color: var(--bid-azul);
 }
 
-/* Sidebar footer */
+/* Sidebar footer (sources) — follows map / country panel in document order */
 .sidebar-footer {
-  margin-top: auto;
+  margin-top: 0;
   padding: .8rem 1.2rem;
   font-size: .68rem;
   color: var(--sidebar-text-muted);
@@ -418,6 +418,11 @@ html {
   color: var(--text-secondary);
   font-weight: 500;
   white-space: nowrap;
+}
+.main-header-tagline {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: .92rem;
 }
 .mobile-menu-btn {
   display: none;
@@ -658,53 +663,7 @@ html {
   flex-direction: column;
   gap: .35rem;
 }
-.top-section-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.55rem;
-  padding: 0.85rem 2rem 0;
-  position: sticky;
-  top: 73px;
-  z-index: 9;
-  background: linear-gradient(180deg, rgba(243,247,252,.98), rgba(243,247,252,.92));
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(0,78,112,.06);
-}
-.banner-section-link {
-  display: inline-flex;
-  align-items: center;
-  min-height: 2rem;
-  padding: 0.3rem 0.7rem;
-  border-radius: 999px;
-  border: 1px solid rgba(0,78,112,.12);
-  background: rgba(255,255,255,.72);
-  color: var(--text-secondary);
-  font-size: .76rem;
-  font-weight: 600;
-  line-height: 1.2;
-  text-decoration: none;
-  transition: background-color .2s ease, color .2s ease, border-color .2s ease, transform .2s ease;
-}
-.banner-top-link {
-  justify-content: center;
-  width: 2.15rem;
-  padding-inline: 0;
-  font-size: 1rem;
-}
-.banner-top-icon {
-  line-height: 1;
-  font-weight: 800;
-}
-.banner-section-link:hover {
-  background: rgba(0,78,112,.08);
-  border-color: rgba(0,78,112,.18);
-  color: var(--bid-azul);
-  transform: translateY(-1px);
-}
-.banner-section-link:focus-visible {
-  outline: 2px solid rgba(0,78,112,.28);
-  outline-offset: 2px;
-}
+/* (Section nav styles moved to shared-chrome.css) */
 
 /* ── Empty state ── */
 .empty-state {
@@ -2416,15 +2375,7 @@ html {
     max-height: 70vh;
   }
   .indicators-wrapper { padding: 1.2rem 1rem 2rem; }
-  .top-section-nav {
-    gap: 0.45rem;
-    padding: 0.75rem 1rem 0;
-    top: 65px;
-  }
-  .banner-section-link {
-    font-size: 0.72rem;
-    padding: 0.28rem 0.62rem;
-  }
+  /* (Section nav responsive styles moved to shared-chrome.css) */
   .cards { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
   .card {
     min-height: 164px;

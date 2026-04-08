@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OGDILAC &mdash; Observatorio de Gobierno Digital de Am&eacute;rica Latina y el Caribe</title>
+  <meta name="description" content="OGDILAC, observatorio de gobierno digital de Am&eacute;rica Latina y el Caribe con indicadores regionales y comparativos." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="css/shared-chrome.css" />
+  <link rel="stylesheet" href="https://www.iadb.org/modules/custom/api_menu_items/V.0.0.5/css/idb-tailwind.css?v=0.0.1" />
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://www.iadb.org/modules/custom/api_menu_items/V.0.0.5/js/main.js?v=0.0.1" defer></script>
+</head>
+<body class="page-ficha">
+
+  <!-- BREADCRUMB -->
+  <nav class="breadcrumb" aria-label="Navegaci&oacute;n">
+    <div class="breadcrumb-inner">
+      <a href="/" class="breadcrumb-link">Inicio</a>
+      <span class="breadcrumb-sep" aria-hidden="true">&rsaquo;</span>
+      <a href="/#paises" class="breadcrumb-link">Pa&iacute;ses</a>
+      <span class="breadcrumb-sep" aria-hidden="true">&rsaquo;</span>
+      <span class="breadcrumb-current" id="breadcrumb-country">Ficha pa&iacute;s</span>
+    </div>
+  </nav>
+
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="map-container" id="map-container">
+        <button type="button" class="map-region-trigger" id="map-region-trigger" aria-label="Ver agregado regional de Am&eacute;rica Latina y el Caribe" title="Am&eacute;rica Latina y el Caribe">
+          <span class="map-region-trigger-icon" aria-hidden="true">&#x1F30E;</span>
+          <span class="map-region-trigger-text">ALC</span>
+        </button>
+        <div class="map-placeholder" id="map-placeholder">
+          <div class="loader-spinner"></div>
+          <p>Cargando mapa&hellip;</p>
+        </div>
+      </div>
+
+      <div class="country-info hidden" id="country-info">
+        <div class="info-header">
+          <span class="info-flag" id="info-flag"></span>
+          <div class="info-title-group">
+            <h2 class="info-name" id="info-name"></h2>
+            <div class="info-meta-block" id="info-meta-block">
+              <div class="info-meta-line">
+                <span class="info-meta-label">Regi&oacute;n</span>
+                <span class="info-meta-value" id="info-subregion"></span>
+              </div>
+              <div class="info-meta-line">
+                <span class="info-meta-label">Nivel de ingresos</span>
+                <span class="info-meta-value" id="info-income-level"></span>
+              </div>
+            </div>
+            <div class="region-country-strip hidden" id="info-region-flags"></div>
+          </div>
+        </div>
+        <div class="info-rows" id="info-rows">
+          <div class="info-row">
+            <span class="info-icon">&#x1F3DB;&#xFE0F;</span>
+            <div>
+              <span class="info-label">CAPITAL</span>
+              <span class="info-value" id="info-capital"></span>
+            </div>
+          </div>
+          <div class="info-row">
+            <span class="info-icon">&#x1F550;</span>
+            <div>
+              <span class="info-label">ZONA HORARIA</span>
+              <span class="info-value" id="info-time"></span>
+              <span class="info-detail" id="info-timezone"></span>
+            </div>
+          </div>
+          <div class="info-row">
+            <span class="info-icon">&#x1F4B1;</span>
+            <div>
+              <span class="info-label">MONEDA</span>
+              <span class="info-value" id="info-currency"></span>
+            </div>
+          </div>
+          <div class="info-row">
+            <span class="info-icon">&#x1F4B5;</span>
+            <div>
+              <span class="info-label">CAMBIO CON EL D&Oacute;LAR</span>
+              <span class="info-value" id="info-exchange"></span>
+            </div>
+          </div>
+          <div class="info-row">
+            <span class="info-icon">&#x1F310;</span>
+            <div>
+              <span class="info-label">DOMINIO DE INTERNET</span>
+              <span class="info-value" id="info-domain"></span>
+            </div>
+          </div>
+          <div class="info-row info-row-neighbors">
+            <span class="info-icon">&#x1F5FA;&#xFE0F;</span>
+            <div>
+              <span class="info-label">PA&Iacute;SES LIM&Iacute;TROFES</span>
+              <div class="info-neighbors" id="info-neighbors"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <p>Fuente: <a href="https://data.worldbank.org/" target="_blank" rel="noopener">Banco Mundial</a> &middot; <a href="https://www.exchangerate-api.com/" target="_blank" rel="noopener">ExchangeRate-API</a></p>
+      </div>
+    </aside>
+
+    <main class="main-content" id="main-content">
+      <div class="ficha-sticky-top">
+        <header class="main-header" id="main-header">
+          <div class="header-left">
+            <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Abrir men&uacute;">&#9776;</button>
+            <span class="header-hint main-header-tagline">Desarrollo digital</span>
+          </div>
+          <div class="header-right">
+            <div class="select-wrapper country-picker" id="country-picker">
+              <select id="country-select" class="country-select country-select-hidden" aria-hidden="true" tabindex="-1">
+                <option value="">&mdash; Elige un pa&iacute;s &mdash;</option>
+              </select>
+              <button type="button" class="country-picker-trigger" id="country-picker-trigger" aria-haspopup="dialog" aria-expanded="false">
+                <span class="country-picker-trigger-text" id="country-picker-trigger-text">&mdash; Elige un pa&iacute;s &mdash;</span>
+                <span class="country-picker-trigger-arrow">&#9662;</span>
+              </button>
+              <div class="country-picker-panel hidden" id="country-picker-panel"></div>
+            </div>
+          </div>
+        </header>
+
+        <nav class="section-nav-bar section-nav-bar--ficha" aria-label="Navegaci&oacute;n por secciones">
+          <div class="section-nav-inner section-nav-inner--ficha">
+            <a href="#main-header" class="section-nav-btn section-nav-btn--top" data-section-key="top" aria-label="Volver arriba" title="Volver arriba">
+              <svg class="section-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
+            </a>
+            <a href="#country-section" class="section-nav-btn" data-section-key="country">
+              <svg class="section-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <span>Datos Pa&iacute;s</span>
+            </a>
+            <a href="#gov-section" class="section-nav-btn" data-section-key="gov">
+              <svg class="section-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+              <span>&Iacute;ndices</span>
+            </a>
+            <a href="#enablers-section" class="section-nav-btn" data-section-key="enablers">
+              <svg class="section-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+              <span>Habilitadores</span>
+            </a>
+            <a href="#national-strategies-section" class="section-nav-btn" data-section-key="nationalStrategies">
+              <svg class="section-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+              <span>Estrategias</span>
+            </a>
+            <a href="#trust-section" class="section-nav-btn" data-section-key="trust">
+              <svg class="section-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <span>Confianza</span>
+            </a>
+            <a href="#digital-guides-section" class="section-nav-btn" data-section-key="guides">
+              <svg class="section-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+              <span>Gu&iacute;as</span>
+            </a>
+            <a href="#bid-projects-section" class="section-nav-btn" data-section-key="bidProjects">
+              <svg class="section-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+              <span>Proyectos BID</span>
+            </a>
+          </div>
+        </nav>
+      </div>
+
+      <div class="country-banner hidden" id="country-banner">
+        <img class="banner-flag" id="banner-flag" alt="" />
+        <div class="banner-title-group">
+          <h2 class="banner-name" id="banner-name"></h2>
+          <div class="banner-meta-block" id="banner-meta-block">
+            <div class="banner-meta-line">
+              <span class="banner-meta-label">Regi&oacute;n</span>
+              <span class="banner-meta-value" id="banner-subregion"></span>
+            </div>
+            <div class="banner-meta-line">
+              <span class="banner-meta-label">Nivel de ingresos</span>
+              <span class="banner-meta-value" id="banner-income-level"></span>
+            </div>
+          </div>
+          <div class="region-country-strip hidden" id="banner-region-flags"></div>
+        </div>
+      </div>
+
+      <div class="loader hidden" id="loader">
+        <div class="loader-spinner"></div>
+        <p>Consultando datos del Banco Mundial&hellip;</p>
+      </div>
+
+      <div class="empty-state" id="empty-state">
+        <span class="empty-icon">&#x1F5FA;&#xFE0F;</span>
+        <h2>Selecciona un pa&iacute;s</h2>
+        <p>Haz clic en un pa&iacute;s del mapa o usa el selector para ver sus indicadores de desarrollo.</p>
+      </div>
+
+      <div class="indicators-wrapper hidden" id="indicators-wrapper">
+        <section class="country-section card-grid" id="country-section">
+          <div class="section-header">
+            <div class="section-heading">
+              <h3 class="section-title">Datos Pa&iacute;s</h3>
+              <p class="section-subtitle hidden" id="country-method-note"></p>
+            </div>
+            <button type="button" class="section-toggle" data-section-key="country" aria-expanded="true" aria-controls="country-section">
+              <span class="section-toggle-text">Ocultar</span>
+              <span class="section-toggle-icon" aria-hidden="true">&#9652;</span>
+            </button>
+          </div>
+
+          <div class="country-subsections">
+            <section class="country-subsection card-grid" id="country-demography-section">
+              <div class="section-header subsection-header">
+                <div class="section-heading">
+                  <h4 class="section-title">Demograf&iacute;a y econom&iacute;a</h4>
+                  <p class="section-subtitle hidden" id="country-demography-method-note"></p>
+                </div>
+                <button type="button" class="section-toggle" data-section-key="countryDemography" aria-expanded="true" aria-controls="country-demography-section">
+                  <span class="section-toggle-text">Ocultar</span>
+                  <span class="section-toggle-icon" aria-hidden="true">&#9652;</span>
+                </button>
+              </div>
+              <div class="cards" id="country-demography-cards"></div>
+              <p class="section-links" id="country-demography-links"></p>
+            </section>
+
+            <section class="country-subsection card-grid" id="country-connectivity-section">
+              <div class="section-header subsection-header">
+                <div class="section-heading">
+                  <h4 class="section-title">Conectividad</h4>
+                  <p class="section-subtitle hidden" id="country-connectivity-method-note"></p>
+                </div>
+                <button type="button" class="section-toggle" data-section-key="countryConnectivity" aria-expanded="true" aria-controls="country-connectivity-section">
+                  <span class="section-toggle-text">Ocultar</span>
+                  <span class="section-toggle-icon" aria-hidden="true">&#9652;</span>
+                </button>
+              </div>
+              <div class="cards" id="country-connectivity-cards"></div>
+              <p class="section-links" id="country-connectivity-links"></p>
+            </section>
+
+            <section class="country-subsection card-grid" id="country-services-section">
+              <div class="section-header subsection-header">
+                <div class="section-heading">
+                  <h4 class="section-title">Servicios y talento digital</h4>
+                  <p class="section-subtitle hidden" id="country-services-method-note"></p>
+                </div>
+                <button type="button" class="section-toggle" data-section-key="countryServices" aria-expanded="true" aria-controls="country-services-section">
+                  <span class="section-toggle-text">Ocultar</span>
+                  <span class="section-toggle-icon" aria-hidden="true">&#9652;</span>
+                </button>
+              </div>
+              <div class="cards" id="country-services-cards"></div>
+              <p class="section-links" id="country-services-links"></p>
+            </section>
+          </div>
+        </section>
+
+        <section class="gov-indices-section" id="gov-section">
+          <div class="section-header">
+            <div class="section-heading">
+              <h3 class="section-title">&Iacute;ndices de Desarrollo Digital del Gobierno</h3>
+              <p class="section-subtitle hidden" id="gov-method-note"></p>
+            </div>
+            <button type="button" class="section-toggle" data-section-key="gov" aria-expanded="true" aria-controls="gov-section">
+              <span class="section-toggle-text">Ocultar</span>
+              <span class="section-toggle-icon" aria-hidden="true">&#9652;</span>
+            </button>
+          </div>
+          <div class="gov-layout">
+            <div class="gov-radar-wrap">
+              <div class="gov-chart-toolbar">
+                <div class="gov-chart-heading">
+                  <h4 class="gov-chart-title" id="gov-chart-title">Comparaci&oacute;n entre &iacute;ndices</h4>
+                  <p class="gov-chart-subtitle" id="gov-radar-note"></p>
+                </div>
+                <div class="gov-chart-toggle" id="gov-chart-toggle" aria-label="Cambiar visualizaci&oacute;n de &iacute;ndices">
+                  <button type="button" class="gov-chart-toggle-btn active" data-gov-chart-view="comparison">Comparativa</button>
+                  <button type="button" class="gov-chart-toggle-btn" data-gov-chart-view="history">Evoluci&oacute;n</button>
+                </div>
+              </div>
+              <canvas id="govRadarChart"></canvas>
+            </div>
+            <div class="gov-index-cards" id="gov-index-cards"></div>
+          </div>
+          <p class="section-links" id="gov-links">
+            <span>Fuentes:</span>
+            <a href="https://publicadministration.desa.un.org/egovkb/en-us/" target="_blank" rel="noopener noreferrer">EGDI (Naciones Unidas)</a>
+            <span>&middot;</span>
+            <a href="https://www.worldbank.org/en/programs/govtech/gtmi" target="_blank" rel="noopener noreferrer">GTMI (Banco Mundial)</a>
+            <span>&middot;</span>
+            <a href="https://www.itu.int/en/ITU-D/Cybersecurity/Pages/global-cybersecurity-index.aspx" target="_blank" rel="noopener noreferrer">GCI (Uni&oacute;n Internacional de las Telecomunicaciones)</a>
+            <span>&middot;</span>
+            <a href="https://www.oecd.org/en/publications/2023-oecd-idb-digital-government-index-of-latin-america-and-the-caribbean_10b82c83-en.html" target="_blank" rel="noopener noreferrer">IGD (OCDE/BID)</a>
+            <span>&middot;</span>
+            <a href="https://oxfordinsights.com/ai-readiness/" target="_blank" rel="noopener noreferrer">AI Readiness (Oxford Insights)</a>
+            <span>&middot;</span>
+            <a href="https://networkreadinessindex.org/" target="_blank" rel="noopener noreferrer">NRI (Portulans Institute)</a>
+          </p>
+        </section>
+
+        <section class="gov-dimensions-section" id="gov-dimensions-section" style="display:none;">
+          <div class="section-header">
+            <div class="section-heading">
+              <h3 class="section-title">Dimensiones &middot; Desglose por &aacute;reas de evaluaci&oacute;n</h3>
+              <p class="section-subtitle hidden" id="dimensions-method-note"></p>
+            </div>
+          </div>
+          <div class="gov-dim-container">
+            <div class="gov-dim-tabs" id="gov-dim-tabs">
+              <button class="dim-tab active" data-index="egdi">
+                <span class="dim-tab-title">eGOV</span>
+                <span class="dim-tab-sub">Naciones Unidas</span>
+              </button>
+              <button class="dim-tab" data-index="gtmi">
+                <span class="dim-tab-title">GovTech</span>
+                <span class="dim-tab-sub">Banco Mundial</span>
+              </button>
+              <button class="dim-tab" data-index="gci">
+                <span class="dim-tab-title">Ciberseguridad</span>
+                <span class="dim-tab-sub">UIT</span>
+              </button>
+              <button class="dim-tab" data-index="ocde">
+                <span class="dim-tab-title">Gobierno Digital</span>
+                <span class="dim-tab-sub">OCDE/BID</span>
+              </button>
+              <button class="dim-tab" data-index="ai">
+                <span class="dim-tab-title">Madurez IA</span>
+                <span class="dim-tab-sub">Oxford Insights</span>
+              </button>
+              <button class="dim-tab" data-index="nri">
+                <span class="dim-tab-title">Preparaci&oacute;n Red</span>
+                <span class="dim-tab-sub">Portulans</span>
+              </button>
+            </div>
+
+            <div id="gov-dim-content">
+              <div class="dim-list-header">
+                <span class="dim-label-sm">PERFIL DE DIMENSIONES</span>
+                <div class="dim-header-right">
+                  <span id="dim-active-index-name" class="dim-active-index-name">GTMI</span>
+                  <select id="dim-year-select" class="dim-year-select" aria-label="Seleccionar a&ntilde;o del &iacute;ndice"></select>
+                </div>
+              </div>
+              <div class="dim-content-grid">
+                <div class="dim-radar-panel">
+                  <canvas id="dimRadarChart"></canvas>
+                  <p class="chart-method-note" id="dim-radar-note"></p>
+                </div>
+                <div class="dim-list-container" id="dim-list-container"></div>
+              </div>
+            </div>
+
+            <div id="gov-dim-empty" style="display: none; padding: 3rem; text-align: center; color: var(--text-secondary);">
+              El desglose por dimensiones no est&aacute; disponible para este &iacute;ndice.
+            </div>
+          </div>
+        </section>
+
+        <section class="card-grid" id="enablers-section">
+          <div class="section-header">
+            <div class="section-heading">
+              <h3 class="section-title">Habilitadores Digitales</h3>
+              <p class="section-subtitle">Mockup con estados simulados por pa&iacute;s y agrupaci&oacute;n por dimensi&oacute;n.</p>
+            </div>
+            <button type="button" class="section-toggle" data-section-key="enablers" aria-expanded="true" aria-controls="enablers-section">
+              <span class="section-toggle-text">Ocultar</span>
+              <span class="section-toggle-icon" aria-hidden="true">&#9652;</span>
+            </button>
+          </div>
+          <div class="digital-enablers" id="digital-enablers"></div>
+        </section>
+
+        <section class="card-grid national-strategies-section" id="national-strategies-section">
+          <div class="section-header">
+            <div class="section-heading">
+              <h3 class="section-title">Estrategias y pol&iacute;ticas nacionales</h3>
+              <p class="section-subtitle">Pol&iacute;ticas de transformaci&oacute;n digital del pa&iacute;s</p>
+            </div>
+            <button type="button" class="section-toggle" data-section-key="nationalStrategies" aria-expanded="true" aria-controls="national-strategies-section">
+              <span class="section-toggle-text">Ocultar</span>
+              <span class="section-toggle-icon" aria-hidden="true">&#9652;</span>
+            </button>
+          </div>
+          <div class="national-strategies-mockup">
+            <div class="national-strategies-shell">
+              <article class="national-strategies-feature">
+                <div class="national-strategies-feature-kicker">Estrategia principal</div>
+                <div class="national-strategies-feature-content">
+                  <div class="national-strategies-feature-copy">
+                    <h4 class="national-strategies-feature-title">Agenda Digital Nacional 2030</h4>
+                    <p class="national-strategies-feature-years">2020 - 2030</p>
+                    <p class="national-strategies-feature-text">Plan estrat&eacute;gico nacional para la transformaci&oacute;n digital del Estado, enfocado en gobierno abierto, servicios digitales e inclusi&oacute;n.</p>
+                  </div>
+                  <span class="national-strategies-feature-link">Ver documento</span>
+                </div>
+              </article>
+
+              <div class="national-strategies-grid">
+                <article class="national-strategies-card national-strategies-card-blue">
+                  <div class="national-strategies-card-head">
+                    <div class="national-strategies-card-icon" aria-hidden="true">&#9881;</div>
+                    <div>
+                      <h5 class="national-strategies-card-title">Plan de Modernizaci&oacute;n del Estado</h5>
+                      <p class="national-strategies-card-copy">Simplificaci&oacute;n administrativa y digitalizaci&oacute;n de tr&aacute;mites</p>
+                    </div>
+                  </div>
+                  <span class="national-strategies-status">En ejecuci&oacute;n</span>
+                </article>
+
+                <article class="national-strategies-card national-strategies-card-red">
+                  <div class="national-strategies-card-head">
+                    <div class="national-strategies-card-icon" aria-hidden="true">&#128737;</div>
+                    <div>
+                      <h5 class="national-strategies-card-title">Estrategia Nacional de Ciberseguridad</h5>
+                      <p class="national-strategies-card-copy">Marco normativo y t&eacute;cnico para la seguridad digital</p>
+                    </div>
+                  </div>
+                  <span class="national-strategies-status">En revisi&oacute;n</span>
+                </article>
+
+                <article class="national-strategies-card national-strategies-card-mint">
+                  <div class="national-strategies-card-head">
+                    <div class="national-strategies-card-icon" aria-hidden="true">&#128246;</div>
+                    <div>
+                      <h5 class="national-strategies-card-title">Plan de Conectividad Federal</h5>
+                      <p class="national-strategies-card-copy">Expansi&oacute;n de infraestructura de telecomunicaciones</p>
+                    </div>
+                  </div>
+                  <span class="national-strategies-status is-complete">Completado</span>
+                </article>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card-grid" id="trust-section">
+          <div class="section-header">
+            <div class="section-heading">
+              <h3 class="section-title">Proveedores de Servicios de Confianza</h3>
+              <p class="section-subtitle">Lista de confianza nacional (LOTL) &middot; Fuente: Red GEALC</p>
+            </div>
+            <button type="button" class="section-toggle" data-section-key="trust" aria-expanded="true" aria-controls="trust-section">
+              <span class="section-toggle-text">Ocultar</span>
+              <span class="section-toggle-icon" aria-hidden="true">&#9652;</span>
+            </button>
+          </div>
+          <div class="trust-summary" id="trust-summary"></div>
+          <div class="trust-providers-grid" id="trust-providers"></div>
+          <p class="section-links section-links-left" id="trust-links"></p>
+        </section>
+
+        <section class="card-grid digital-guides-section" id="digital-guides-section">
+          <div class="section-header">
+            <div class="section-heading">
+              <div class="digital-guides-title-row">
+                <span class="digital-guides-title-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true">
+                    <rect x="3.5" y="4.5" width="14" height="15" rx="1.75" stroke="currentColor" stroke-width="1.75"></rect>
+                    <path d="M8 9h5.5M8 12h5.5M8 15h3" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"></path>
+                    <path d="M18.5 5.5v13" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"></path>
+                  </svg>
+                </span>
+                <h3 class="section-title">Gu&iacute;as de Transformaci&oacute;n Digital</h3>
+              </div>
+              <p class="section-subtitle">Referencias del pa&iacute;s en secciones de referencia internacional y ejemplos</p>
+            </div>
+            <button type="button" class="section-toggle" data-section-key="guides" aria-expanded="true" aria-controls="digital-guides-section">
+              <span class="section-toggle-text">Ocultar</span>
+              <span class="section-toggle-icon" aria-hidden="true">&#9652;</span>
+            </button>
+          </div>
+          <div class="digital-guides-mockup" aria-label="Mockup visual de una gu&iacute;a de transformaci&oacute;n digital">
+            <div class="digital-guides-shell">
+              <p class="digital-guides-breadcrumbs">Dashboard <span>&rsaquo;</span> Ficha Pa&iacute;s <span>&rsaquo;</span> Uruguay</p>
+              <div class="digital-guides-shell-header">
+                <div>
+                  <p class="digital-guides-shell-kicker">Mockup visual de referencia</p>
+                  <h4 class="digital-guides-shell-title">Ficha Pa&iacute;s: Uruguay</h4>
+                </div>
+              </div>
+
+              <div class="digital-guides-hero">
+                <div class="digital-guides-hero-body">
+                  <h5 class="digital-guides-hero-title">Gu&iacute;a de Transformaci&oacute;n Digital y Estado de Situaci&oacute;n</h5>
+                </div>
+              </div>
+
+              <div class="digital-guides-grid">
+                <div class="digital-guides-column">
+                  <article class="guide-card guide-card-blue">
+                    <div class="guide-card-accent" aria-hidden="true"></div>
+                    <div class="guide-card-head">
+                      <div>
+                        <div class="guide-card-title-row">
+                          <span class="guide-card-dot" aria-hidden="true"></span>
+                          <h5 class="guide-card-title">Gobierno e institucionalidad</h5>
+                        </div>
+                        <p class="guide-card-subtitle">Liderazgo y Estrategia Digital</p>
+                      </div>
+                      <span class="guide-card-icon" aria-hidden="true">&#127970;</span>
+                    </div>
+                    <div class="guide-card-list">
+                      <div class="guide-card-item">
+                        <h6 class="guide-card-item-title">Estrategia de Transformaci&oacute;n Digital (Hacia el 2025)</h6>
+                        <p class="guide-card-item-copy"><strong>SECTION:</strong> Estrategia nacional. Enfoque: hoja de ruta para un &ldquo;Gobierno inteligente&rdquo;, la econom&iacute;a digital, la integraci&oacute;n y la ciudadan&iacute;a digital. <span class="guide-card-page">[PAGE 25]</span></p>
+                      </div>
+                      <div class="guide-card-item">
+                        <h6 class="guide-card-item-title">AGESIC (Agencia de Gobierno Electr&oacute;nico)</h6>
+                        <p class="guide-card-item-copy"><strong>SECTION:</strong> Gobernanza. Enfoque: organismo rector encargado de dise&ntilde;ar, promover y evaluar las pol&iacute;ticas de TI en el sector p&uacute;blico.</p>
+                      </div>
+                    </div>
+                  </article>
+
+                  <article class="guide-card guide-card-yellow">
+                    <div class="guide-card-accent" aria-hidden="true"></div>
+                    <div class="guide-card-head">
+                      <div>
+                        <div class="guide-card-title-row">
+                          <span class="guide-card-dot" aria-hidden="true"></span>
+                          <h5 class="guide-card-title">Marco Normativo</h5>
+                        </div>
+                        <p class="guide-card-subtitle">Regulaciones y Seguridad Jur&iacute;dica Digital</p>
+                      </div>
+                      <span class="guide-card-icon" aria-hidden="true">&#128209;</span>
+                    </div>
+                    <div class="guide-card-list">
+                      <div class="guide-card-item">
+                        <h6 class="guide-card-item-title">Ley de Protecci&oacute;n de Datos Personales (Ley N&ordm; 18.331)</h6>
+                      </div>
+                    </div>
+                  </article>
+
+                  <article class="guide-card guide-card-orange">
+                    <div class="guide-card-accent" aria-hidden="true"></div>
+                    <div class="guide-card-head">
+                      <div>
+                        <div class="guide-card-title-row">
+                          <span class="guide-card-dot" aria-hidden="true"></span>
+                          <h5 class="guide-card-title">Confianza digital</h5>
+                        </div>
+                        <p class="guide-card-subtitle">Identidad, Derechos y Firma Digital</p>
+                      </div>
+                      <span class="guide-card-icon" aria-hidden="true">&#128161;</span>
+                    </div>
+                    <div class="guide-card-list">
+                      <div class="guide-card-item">
+                        <h6 class="guide-card-item-title">Identidad Digital</h6>
+                        <p class="guide-card-item-copy"><strong>SECTION:</strong> Derechos digitales. Enfoque: identidad interoperable para acceder a servicios p&uacute;blicos y privados con autenticaci&oacute;n segura. <span class="guide-card-page">[PAGE 67]</span></p>
+                      </div>
+                      <div class="guide-card-item">
+                        <h6 class="guide-card-item-title">Firma Electr&oacute;nica y Documento Digital</h6>
+                        <p class="guide-card-item-copy"><strong>SECTION:</strong> Transacciones digitales. Enfoque: validez legal para documentos y firmas para la ciudadan&iacute;a, adaptando la fuerza de trabajo a la econom&iacute;a digital.</p>
+                      </div>
+                    </div>
+                  </article>
+                </div>
+
+                <div class="digital-guides-column">
+                  <article class="guide-card guide-card-green">
+                    <div class="guide-card-accent" aria-hidden="true"></div>
+                    <div class="guide-card-head">
+                      <div>
+                        <div class="guide-card-title-row">
+                          <span class="guide-card-dot" aria-hidden="true"></span>
+                          <h5 class="guide-card-title">Talento digital</h5>
+                        </div>
+                        <p class="guide-card-subtitle">Educaci&oacute;n, Capacitaci&oacute;n y Habilidades</p>
+                      </div>
+                      <span class="guide-card-icon" aria-hidden="true">&#127793;</span>
+                    </div>
+                    <div class="guide-card-list">
+                      <div class="guide-card-item">
+                        <h6 class="guide-card-item-title">Plan Ceibal</h6>
+                        <p class="guide-card-item-copy"><strong>SECTION:</strong> Educaci&oacute;n / Inclusi&oacute;n. Enfoque: referencia mundial del modelo 1 a 1, con promoci&oacute;n del pensamiento computacional y la programaci&oacute;n en escuelas. <span class="guide-card-page">[PAGE 48]</span></p>
+                      </div>
+                      <div class="guide-card-item">
+                        <h6 class="guide-card-item-title">Plan Nacional de Habilidades Digitales</h6>
+                        <p class="guide-card-item-copy"><strong>SECTION:</strong> Capacitaci&oacute;n laboral. Enfoque: programas de reskilling y upskilling para la ciudadan&iacute;a, adaptando la fuerza de trabajo a la econom&iacute;a digital.</p>
+                      </div>
+                    </div>
+                  </article>
+
+                  <article class="guide-card guide-card-purple">
+                    <div class="guide-card-accent" aria-hidden="true"></div>
+                    <div class="guide-card-head">
+                      <div>
+                        <div class="guide-card-title-row">
+                          <span class="guide-card-dot" aria-hidden="true"></span>
+                          <h5 class="guide-card-title">Servicios digitales</h5>
+                        </div>
+                        <p class="guide-card-subtitle">Ventanilla &Uacute;nica y Tr&aacute;mites Eficientes</p>
+                      </div>
+                      <span class="guide-card-icon" aria-hidden="true">&#128187;</span>
+                    </div>
+                    <div class="guide-card-list">
+                      <div class="guide-card-item">
+                        <h6 class="guide-card-item-title">gub.uy (Portal &Uacute;nico del Estado)</h6>
+                        <p class="guide-card-item-copy"><strong>SECTION:</strong> Ventanilla &uacute;nica. Enfoque: centraliza tr&aacute;mites e informaci&oacute;n del Estado, incluyendo el Perfil Ciudadano para gestionar documentos e interacciones. <span class="guide-card-page">[PAGE 55]</span></p>
+                      </div>
+                      <div class="guide-card-item">
+                        <h6 class="guide-card-item-title">Historia Cl&iacute;nica Electr&oacute;nica Nacional (HCEN)</h6>
+                        <p class="guide-card-item-copy"><strong>SECTION:</strong> E-salud. Enfoque: permite que la informaci&oacute;n m&eacute;dica de un paciente sea accesible por profesionales de la salud en cualquier punto del pa&iacute;s.</p>
+                      </div>
+                      <div class="guide-card-item">
+                        <h6 class="guide-card-item-title">Sistema de Notificaciones Electr&oacute;nicas (CNE)</h6>
+                        <p class="guide-card-item-copy"><strong>SECTION:</strong> E-justicia / E-administraci&oacute;n. Enfoque: herramienta para enviar y recibir notificaciones legales y administrativas con validez plena. <span class="guide-card-page">[PAGE 31]</span></p>
+                      </div>
+                    </div>
+                  </article>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card-grid bid-projects-section" id="bid-projects-section">
+          <div class="section-header">
+            <div class="section-heading">
+              <h3 class="section-title">Proyectos BID</h3>
+              <p class="section-subtitle">Operaciones de Modernizaci&oacute;n del Estado</p>
+            </div>
+            <button type="button" class="section-toggle" data-section-key="bidProjects" aria-expanded="true" aria-controls="bid-projects-section">
+              <span class="section-toggle-text">Ocultar</span>
+              <span class="section-toggle-icon" aria-hidden="true">&#9652;</span>
+            </button>
+          </div>
+          <div class="bid-projects-body">
+            <div class="bid-projects-filters" id="bid-projects-filters"></div>
+            <div class="bid-projects-summary" id="bid-projects-summary"></div>
+            <div class="bid-projects-table-shell" id="bid-projects-table-shell"></div>
+          </div>
+          <p class="section-links" id="bid-projects-links"></p>
+        </section>
+      </div>
+
+      <div class="error hidden" id="error">
+        <span class="error-icon">&#9888;&#xFE0F;</span>
+        <p id="error-msg">Error al obtener los datos.</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- PARTNERS BAR -->
+  <div class="site-ftr-partners">
+    <p class="site-ftr-partners-label"><strong>OGDILAC es un proyecto impulsado por</strong></p>
+    <div class="site-ftr-partners-logos">
+      <a href="https://www.redgealc.org/" class="partner-logo-link" target="_blank" rel="noopener noreferrer">
+        <img src="/img/gealc.png" alt="Red GEALC" class="partner-logo" />
+      </a>
+      <a href="https://administracion.gob.es/" class="partner-logo-link" target="_blank" rel="noopener noreferrer">
+        <img src="/img/spain.svg" alt="Gobierno de Espa&ntilde;a" class="partner-logo" />
+      </a>
+      <a href="https://plus.gov.kr/" class="partner-logo-link" target="_blank" rel="noopener noreferrer">
+        <img src="/img/korea.png" alt="The Government of the Republic of Korea" class="partner-logo" />
+      </a>
+    </div>
+  </div>
+
+  <!-- IDB language config (footer injection) -->
+  <input type="hidden" id="language_IADB" name="language_IADB" value="es">
+  <input type="hidden" id="en_path_IADB" name="en_path_IADB" value="no-link">
+  <input type="hidden" id="es_path_IADB" name="es_path_IADB" value="/ficha.html">
+  <input type="hidden" id="pt_path_IADB" name="pt_path_IADB" value="no-link">
+  <input type="hidden" id="fr_path_IADB" name="fr_path_IADB" value="no-link">
+
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
