@@ -65,8 +65,8 @@ const dimRadarNote = $('#dim-radar-note');
 const govChartTitle = $('#gov-chart-title');
 const govChartToggle = $('#gov-chart-toggle');
 const sectionToggleButtons = $$('.section-toggle');
-const sectionNavLinks = $$('.banner-section-link[data-section-key]');
-const bidProjectsNavLink = document.querySelector('.banner-section-link[data-section-key="bidProjects"]');
+const sectionNavLinks = $$('.section-nav-btn[data-section-key]');
+const bidProjectsNavLink = document.querySelector('.section-nav-btn[data-section-key="bidProjects"]');
 
 // State
 let countries = [];
@@ -1147,7 +1147,7 @@ function renderDigitalEnablers(data) {
   if (!digitalEnablersEl || !enablersSection) return;
 
   const isRegionAggregate = Boolean(data.country?.isRegionAggregate);
-  const navLink = document.querySelector('.banner-section-link[data-section-key="enablers"]');
+  const navLink = document.querySelector('.section-nav-btn[data-section-key="enablers"]');
   if (isRegionAggregate || !data.digitalEnablers?.dimensions?.length) {
     enablersSection.style.display = 'none';
     if (navLink) navLink.classList.add('hidden');
@@ -1224,7 +1224,7 @@ function renderDigitalEnablers(data) {
 function renderNationalStrategiesSection(data) {
   if (!nationalStrategiesSection) return;
 
-  const navLink = document.querySelector('.banner-section-link[data-section-key="nationalStrategies"]');
+  const navLink = document.querySelector('.section-nav-btn[data-section-key="nationalStrategies"]');
   const isRegionAggregate = Boolean(data.country?.isRegionAggregate);
 
   nationalStrategiesSection.style.display = isRegionAggregate ? 'none' : '';
@@ -1241,7 +1241,7 @@ function formatTrustProviderCount(count) {
 function renderTrustProviders(data) {
   if (!trustSection || !trustSummary || !trustProvidersEl || !trustLinks) return;
 
-  const navLink = document.querySelector('.banner-section-link[data-section-key="trust"]');
+  const navLink = document.querySelector('.section-nav-btn[data-section-key="trust"]');
   const isRegionAggregate = Boolean(data.country?.isRegionAggregate);
   const trustData = data.trustProviders || {};
   const providers = Array.isArray(trustData.providers) ? trustData.providers : [];
@@ -2217,6 +2217,9 @@ function renderCountryInfo(country) {
   const isRegionAggregate = Boolean(country.isRegionAggregate);
   $('#info-flag').textContent = isRegionAggregate ? '\uD83C\uDF0E' : getFlagEmoji(country.iso3);
   $('#info-name').textContent   = fixText(country.name);
+
+  const bcEl = document.getElementById('breadcrumb-country');
+  if (bcEl) bcEl.textContent = fixText(country.name);
   $('#info-subregion').textContent = fixText(country.bidRegion || '\u2014');
   const infoIncomeLevel = $('#info-income-level');
   infoIncomeLevel.textContent = fixText(country.incomeLevel || '\u2014');
@@ -2377,6 +2380,9 @@ function toggleCountryPicker() {
 }
 
 async function initMap() {
+  const mapEl = $('#map-container');
+  if (!mapEl) return;
+
   try {
     await ensureMapLibraries();
     const world = await d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json');
@@ -2423,6 +2429,42 @@ async function initMap() {
       .attr('class', 'country-path non-latam')
       .attr('d', path);
 
+    /* ── Map tooltip ── */
+    const tooltip = document.createElement('div');
+    tooltip.className = 'map-tooltip';
+    tooltip.setAttribute('aria-hidden', 'true');
+    mapEl.appendChild(tooltip);
+
+    function showMapTooltip(iso3, evt) {
+      const country = countries.find(c => c.iso3 === iso3);
+      if (!country) return;
+      const flagSrc = getFlagCdnUrl(iso3, 'w40');
+      const name = fixText(country.name);
+      tooltip.innerHTML =
+        `<img class="map-tooltip-flag" src="${flagSrc}" alt="" />` +
+        `<span class="map-tooltip-name">${name}</span>` +
+        `<span class="map-tooltip-hint">Ver ficha ›</span>`;
+      tooltip.classList.add('is-visible');
+      positionMapTooltip(evt);
+    }
+
+    function positionMapTooltip(evt) {
+      const rect = mapEl.getBoundingClientRect();
+      let x = evt.clientX - rect.left + 12;
+      let y = evt.clientY - rect.top - 8;
+      const tw = tooltip.offsetWidth;
+      const th = tooltip.offsetHeight;
+      if (x + tw > rect.width - 6) x = evt.clientX - rect.left - tw - 8;
+      if (y + th > rect.height - 6) y = y - th;
+      if (y < 2) y = 2;
+      tooltip.style.left = x + 'px';
+      tooltip.style.top = y + 'px';
+    }
+
+    function hideMapTooltip() {
+      tooltip.classList.remove('is-visible');
+    }
+
     // LATAM countries
     svg.selectAll('.latam')
       .data(latamFeatures)
@@ -2430,32 +2472,45 @@ async function initMap() {
       .attr('class', 'country-path')
       .attr('d', path)
       .attr('data-id', d => normalizeCountryId(d.id))
-      .style('fill', d => COUNTRY_COLORS[normalizeCountryId(d.id)] || '#2c5282')
       .on('click', (event, d) => {
         const numId = normalizeCountryId(d.id);
         const iso = numericToIso[numId];
         if (iso) loadCountry(iso);
-      });
+      })
+      .on('mouseenter', (event, d) => {
+        const iso = numericToIso[normalizeCountryId(d.id)];
+        if (iso) showMapTooltip(iso, event);
+      })
+      .on('mousemove', (event) => {
+        if (tooltip.classList.contains('is-visible')) positionMapTooltip(event);
+      })
+      .on('mouseleave', hideMapTooltip);
 
-    // Labels
-    svg.selectAll('.country-label')
-      .data(latamFeatures)
-      .join('text')
-      .attr('class', d => {
-        const cfg = LABEL_CONFIG[normalizeCountryId(d.id)];
-        return `country-label${cfg && cfg.small ? ' small-label' : ''}`;
-      })
-      .attr('x', d => {
-        const c = path.centroid(d);
-        const cfg = LABEL_CONFIG[normalizeCountryId(d.id)];
-        return c[0] + (cfg ? cfg.dx : 0);
-      })
-      .attr('y', d => {
-        const c = path.centroid(d);
-        const cfg = LABEL_CONFIG[normalizeCountryId(d.id)];
-        return c[1] + (cfg ? cfg.dy : 0);
-      })
-      .text(d => fixText(COUNTRY_NAMES_ES[normalizeCountryId(d.id)] || ''));
+    // Ajustar viewBox al trazo real (menos bandas vacías arriba/abajo en el marco)
+    const pad = 6;
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    svg.selectAll('path').each(function () {
+      try {
+        const b = this.getBBox();
+        if (!(b.width > 0 || b.height > 0)) return;
+        minX = Math.min(minX, b.x);
+        minY = Math.min(minY, b.y);
+        maxX = Math.max(maxX, b.x + b.width);
+        maxY = Math.max(maxY, b.y + b.height);
+      } catch (e) {
+        /* ignore */
+      }
+    });
+    if (Number.isFinite(minX)) {
+      minX -= pad;
+      minY -= pad;
+      maxX += pad;
+      maxY += pad;
+      svg.attr('viewBox', `${minX} ${minY} ${maxX - minX} ${maxY - minY}`);
+    }
 
   } catch (err) {
     console.error('Error loading map:', err);
@@ -2592,8 +2647,12 @@ async function init() {
     }
   });
 
+  initSiteChrome();
   await initMap();
-  await loadCountry(REGION_AGGREGATE_ISO);
+
+  const urlIso = new URLSearchParams(window.location.search).get('country');
+  const startIso = (urlIso && countries.find(c => c.iso3 === urlIso)) ? urlIso : REGION_AGGREGATE_ISO;
+  await loadCountry(startIso);
 }
 
 function getIndicatorTooltip(indicator) {
@@ -2669,7 +2728,7 @@ function scrollSectionHeaderIntoView(target) {
   if (!target) return;
   const header = target.querySelector('.section-header') || target;
   const mainHeaderEl = document.getElementById('main-header');
-  const topNavEl = document.querySelector('.top-section-nav');
+  const topNavEl = document.querySelector('.section-nav-bar--ficha');
   const scroller = document.getElementById('main-content');
   const stickyOffset = (mainHeaderEl?.offsetHeight || 0) + (topNavEl?.offsetHeight || 0) + 12;
   const top = scroller
@@ -2752,6 +2811,8 @@ function getDimensionMethodTooltip(tabKey, isRegionAggregate, year = null) {
   return map[tabKey] || 'Promedio regional de la dimensi\u00F3n para los 26 pa\u00EDses de ALC.';
 }
 
+function initSiteChrome() {
+  /* IDB corporate header is injected externally via main.js from iadb.org */
+}
+
 init();
-
-
