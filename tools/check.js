@@ -3,9 +3,11 @@ const { execFileSync } = require('child_process');
 const files = [
   'server.js',
   'src/server/index.js',
+  'src/server/data/digitalEnablers.js',
   'src/server/routes/api.js',
   'src/server/services/bidProjects.js',
   'src/server/domain/govSeries.js',
+  'public/js/habilitadores.js',
   'public/js/main.js',
   'public/js/bidProjects.js',
 ];

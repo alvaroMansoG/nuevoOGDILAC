@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OGDILAC &mdash; Habilitadores Digitales</title>
+  <meta
+    name="description"
+    content="Herramienta comparativa para consultar, filtrar y exportar el estado de los habilitadores digitales por país en América Latina y el Caribe."
+  />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/shared-chrome.css" />
+  <link rel="stylesheet" href="css/habilitadores.css" />
+  <link rel="stylesheet" href="https://www.iadb.org/modules/custom/api_menu_items/V.0.0.5/css/idb-tailwind.css?v=0.0.1" />
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://www.iadb.org/modules/custom/api_menu_items/V.0.0.5/js/main.js?v=0.0.1" defer></script>
+</head>
+<body class="page-habilitadores">
+  <nav class="breadcrumb" aria-label="Navegación">
+    <div class="breadcrumb-inner">
+      <a href="/" class="breadcrumb-link">Inicio</a>
+      <span class="breadcrumb-sep" aria-hidden="true">&rsaquo;</span>
+      <a href="/#indicadores" class="breadcrumb-link">Indicadores</a>
+      <span class="breadcrumb-sep" aria-hidden="true">&rsaquo;</span>
+      <span class="breadcrumb-current">Habilitadores Digitales</span>
+    </div>
+  </nav>
+
+  <header class="enablers-hero" id="top">
+    <div class="enablers-hero-inner">
+      <div class="enablers-hero-meta">
+        <span class="enablers-hero-badge enablers-hero-badge-soft" id="dataset-updated-pill">Actualizando dataset&hellip;</span>
+      </div>
+      <div class="enablers-hero-copy">
+        <h1 class="enablers-title">Habilitadores Digitales</h1>
+        <p class="enablers-subtitle">
+          Los Habilitadores Digitales son la base tecnológica que impulsa la modernización y eficiencia de los servicios públicos en la región.
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <main class="enablers-main">
+    <div class="enablers-intro">
+      <p>Los Habilitadores Digitales son elementos fundamentales que permiten la implementación de soluciones tecnológicas avanzadas en el ámbito gubernamental. Su objetivo es proporcionar una infraestructura robusta y flexible que soporte la integración de tecnologías emergentes, facilitando así la modernización y eficiencia de los servicios públicos. Estos habilitadores actúan como pilares esenciales para impulsar la transformación digital en la región.</p>
+    </div>
+
+    <!-- ── Toolbar: filters + export + legend ─────────── -->
+    <div class="matrix-toolbar" id="matrix-toolbar">
+      <div class="toolbar-left">
+        <button type="button" class="toolbar-icon-btn toolbar-filter-btn" id="filters-toggle" aria-expanded="false" aria-controls="filters-panel" title="Abrir filtros">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          <span class="toolbar-icon-label">Filtros</span>
+        </button>
+        <button type="button" class="toolbar-icon-btn toolbar-reset-btn hidden" id="reset-filters-top" title="Limpiar filtros">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+          <span class="toolbar-icon-label">Limpiar</span>
+        </button>
+        <div class="toolbar-status-pill" id="filters-status">Sin filtros</div>
+      </div>
+
+
+    </div>
+
+    <!-- ── Filters panel (drawer, initially hidden) ─── -->
+    <div class="filters-drawer hidden" id="filters-panel">
+      <div class="filters-drawer-head">
+        <div>
+          <h3 class="filters-drawer-title">Filtros</h3>
+        </div>
+        <button type="button" class="toolbar-icon-btn" id="filters-close" title="Cerrar filtros">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="filters-grid">
+        <section class="filter-group" data-group-key="countries">
+          <div class="filter-group-head">
+            <h4>País</h4>
+            <div class="filter-group-actions">
+              <button type="button" class="filter-group-action" data-action="select-all" data-group="countries">Todos</button>
+              <button type="button" class="filter-group-action" data-action="unselect-all" data-group="countries">Ninguno</button>
+            </div>
+            <span class="filter-group-count" id="count-countries">0</span>
+          </div>
+          <label class="filter-search">
+            <span>Buscar país</span>
+            <input type="search" placeholder="Ej. Chile, Uruguay, Caribe" data-filter-search="countries" />
+          </label>
+          <div class="filter-options" id="options-countries"></div>
+        </section>
+
+        <section class="filter-group" data-group-key="dimensions">
+          <div class="filter-group-head">
+            <h4>Dimensión</h4>
+            <div class="filter-group-actions">
+              <button type="button" class="filter-group-action" data-action="select-all" data-group="dimensions">Todos</button>
+              <button type="button" class="filter-group-action" data-action="unselect-all" data-group="dimensions">Ninguno</button>
+            </div>
+            <span class="filter-group-count" id="count-dimensions">0</span>
+          </div>
+          <label class="filter-search">
+            <span>Buscar dimensión</span>
+            <input type="search" placeholder="Ej. Gobernanza, Servicios" data-filter-search="dimensions" />
+          </label>
+          <div class="filter-options" id="options-dimensions"></div>
+        </section>
+
+        <section class="filter-group" data-group-key="enablers">
+          <div class="filter-group-head">
+            <h4>Habilitador</h4>
+            <div class="filter-group-actions">
+              <button type="button" class="filter-group-action" data-action="select-all" data-group="enablers">Todos</button>
+              <button type="button" class="filter-group-action" data-action="unselect-all" data-group="enablers">Ninguno</button>
+            </div>
+            <span class="filter-group-count" id="count-enablers">0</span>
+          </div>
+          <label class="filter-search">
+            <span>Buscar habilitador</span>
+            <input type="search" placeholder="Ej. Identidad digital, GSOC" data-filter-search="enablers" />
+          </label>
+          <div class="filter-options" id="options-enablers"></div>
+        </section>
+
+        <section class="filter-group" data-group-key="tags">
+          <div class="filter-group-head">
+            <h4>Tag</h4>
+            <div class="filter-group-actions">
+              <button type="button" class="filter-group-action" data-action="select-all" data-group="tags">Todos</button>
+              <button type="button" class="filter-group-action" data-action="unselect-all" data-group="tags">Ninguno</button>
+            </div>
+            <span class="filter-group-count" id="count-tags">0</span>
+          </div>
+          <label class="filter-search">
+            <span>Buscar tag</span>
+            <input type="search" placeholder="Ej. IA, Ciberseguridad" data-filter-search="tags" />
+          </label>
+          <div class="filter-options" id="options-tags"></div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ── Active filter chips ──────────────────────── -->
+    <div class="active-filters" id="active-filters" aria-live="polite"></div>
+
+    <!-- ── Matrix (the star of the page) ──────────── -->
+    <section class="matrix-card" id="matrix-section">
+      <div class="matrix-card-header">
+        <div class="toolbar-right">
+          <div class="legend-inline" style="margin-right: .5rem;">
+            <span class="legend-dot legend-dot--yes"></span><span class="legend-label">SI (Enlace a la información)</span>
+            <span class="legend-dot legend-dot--dev"></span><span class="legend-label">EN DESARROLLO</span>
+            <span class="legend-dot legend-dot--no"></span><span class="legend-label">No hay información</span>
+          </div>
+          <button type="button" class="toolbar-icon-btn" data-export-trigger title="Exportar datos">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </button>
+          <!-- Export dropdown -->
+          <div class="export-dropdown hidden" id="export-dropdown">
+            <div class="export-dropdown-section">
+              <span class="export-dropdown-label">Dataset completo</span>
+              <div class="export-dropdown-actions">
+                <button type="button" class="export-mini-btn" data-export-scope="all" data-export-format="xlsx" title="Excel">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  <span>XLSX</span>
+                </button>
+                <button type="button" class="export-mini-btn" data-export-scope="all" data-export-format="csv" title="CSV">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  <span>CSV</span>
+                </button>
+                <button type="button" class="export-mini-btn" data-export-scope="all" data-export-format="json" title="JSON">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  <span>JSON</span>
+                </button>
+              </div>
+            </div>
+            <div class="export-dropdown-section export-filtered-section hidden" id="export-filtered-section">
+              <span class="export-dropdown-label">Filtro actual</span>
+              <div class="export-dropdown-actions">
+                <button type="button" class="export-mini-btn export-mini-btn--accent" data-export-scope="filtered" data-export-format="xlsx" title="Excel filtrado">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  <span>XLSX</span>
+                </button>
+                <button type="button" class="export-mini-btn export-mini-btn--accent" data-export-scope="filtered" data-export-format="csv" title="CSV filtrado">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  <span>CSV</span>
+                </button>
+                <button type="button" class="export-mini-btn export-mini-btn--accent" data-export-scope="filtered" data-export-format="json" title="JSON filtrado">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  <span>JSON</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="matrix-shell" id="matrix-shell" aria-live="polite">
+        <div class="matrix-loading">
+          <div class="matrix-loading-spinner"></div>
+          <p>Cargando habilitadores digitales&hellip;</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="site-ftr-partners">
+    <p class="site-ftr-partners-label"><strong>OGDILAC es un proyecto impulsado por</strong></p>
+    <div class="site-ftr-partners-logos">
+      <a href="https://www.redgealc.org/" class="partner-logo-link" target="_blank" rel="noopener noreferrer">
+        <img src="/img/gealc.png" alt="Red GEALC" class="partner-logo" />
+      </a>
+      <a href="https://administracion.gob.es/" class="partner-logo-link" target="_blank" rel="noopener noreferrer">
+        <img src="/img/spain.svg" alt="Gobierno de España" class="partner-logo" />
+      </a>
+      <a href="https://plus.gov.kr/" class="partner-logo-link" target="_blank" rel="noopener noreferrer">
+        <img src="/img/korea.png" alt="The Government of the Republic of Korea" class="partner-logo" />
+      </a>
+    </div>
+  </div>
+
+  <input type="hidden" id="language_IADB" name="language_IADB" value="es">
+  <input type="hidden" id="en_path_IADB" name="en_path_IADB" value="no-link">
+  <input type="hidden" id="es_path_IADB" name="es_path_IADB" value="/habilitadores.html">
+  <input type="hidden" id="pt_path_IADB" name="pt_path_IADB" value="no-link">
+  <input type="hidden" id="fr_path_IADB" name="fr_path_IADB" value="no-link">
+  
+  <!-- ── External link warning modal ─── -->
+  <div id="external-link-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Vas a salir del sitio web</h3>
+      </div>
+      <div class="modal-body">
+        <p class="modal-copy">Usted va a ser redirigido a una página externa</p>
+        <div class="modal-url-box">
+          <span id="modal-url-text"></span>
+        </div>
+        <div class="modal-options">
+          <label class="modal-checkbox-wrapper">
+            <input type="checkbox" id="modal-dont-show-again">
+            <span class="modal-checkbox-custom"></span>
+            <span class="modal-checkbox-label">No mostrar más este aviso</span>
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="modal-cancel-btn" class="modal-btn modal-btn--secondary">CANCELAR</button>
+        <button type="button" id="modal-accept-btn" class="modal-btn modal-btn--primary">ACEPTAR</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script type="module" src="js/habilitadores.js"></script>
+</body>
+</html>

@@ -7,6 +7,7 @@
     "dev": "node --watch server.js",
     "start": "node server.js",
     "build:gov-history": "python tools/build_gov_history.py",
+    "build:digital-enablers": "powershell -NoProfile -ExecutionPolicy Bypass -File tools/build_digital_enablers.ps1",
     "lint": "node tools/check.js",
     "check": "npm run lint",
     "smoke:api": "node tools/smoke-api.js"

@@ -31,5 +31,6 @@ module.exports = {
     public: path.resolve(__dirname, '../../../public'),
     img: path.resolve(__dirname, '../../../img'),
     govHistory: path.resolve(__dirname, '../../../data/generated/gov_history.json'),
+    digitalEnablers: path.resolve(__dirname, '../../../data/generated/digital_enablers.json'),
   },
 };
