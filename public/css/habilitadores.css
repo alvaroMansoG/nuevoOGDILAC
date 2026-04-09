@@ -1182,6 +1182,74 @@ body.page-habilitadores .breadcrumb-inner {
   background: rgba(11, 98, 121, 0.06);
 }
 
+/* ── Enhanced Matrix Interaction ─────────── */
+.matrix-row-highlight {
+  background-color: rgba(11, 98, 121, 0.04) !important;
+}
+
+.matrix-col-highlight {
+  background-color: rgba(11, 98, 121, 0.04) !important;
+}
+
+.matrix-col-header-highlight {
+  background-color: rgba(11, 98, 121, 0.07) !important;
+  color: var(--en-brand) !important;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ── Dot Entrance Animation ───────────────── */
+@keyframes dot-entrance {
+  from { 
+    transform: scale(0.2); 
+    opacity: 0; 
+  }
+  to { 
+    transform: scale(1); 
+    opacity: 1; 
+  }
+}
+
+.matrix-dot {
+  animation: dot-entrance 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
+}
+
+/* ── Back to Top Button ────────────────────── */
+.back-to-top-btn {
+  position: fixed;
+  bottom: 2.5rem;
+  right: 2.5rem;
+  width: 3.8rem;
+  height: 3.8rem;
+  border-radius: 50%;
+  background: var(--en-brand);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 30px rgba(11, 98, 121, 0.22);
+  border: 0;
+  cursor: pointer;
+  z-index: 1000;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.back-to-top-btn:hover {
+  transform: translateY(-6px);
+  background: #095063;
+  box-shadow: 0 15px 40px rgba(11, 98, 121, 0.3);
+}
+
+.back-to-top-btn svg {
+  width: 1.6rem;
+  height: 1.6rem;
+}
+
+.back-to-top-btn.hidden {
+  opacity: 0;
+  transform: scale(0.7) translateY(25px);
+  pointer-events: none;
+}
+
 .hidden {
   display: none !important;
 }

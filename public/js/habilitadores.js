@@ -67,6 +67,8 @@ const modalAcceptBtnEl = document.getElementById('modal-accept-btn');
 const modalCancelBtnEl = document.getElementById('modal-cancel-btn');
 const modalDontShowCheckboxEl = document.getElementById('modal-dont-show-again');
 
+const backToTopBtnEl = document.getElementById('back-to-top');
+
 const infoTooltipEl = document.createElement('div');
 infoTooltipEl.className = 'matrix-floating-tooltip hidden';
 document.body.appendChild(infoTooltipEl);
@@ -418,9 +420,9 @@ function renderMatrix(view) {
   const headHtml = `
     <thead>
       <tr>
-        <th scope="col">Habilitador</th>
-        ${view.countries.map((country) => `
-          <th scope="col" title="${escapeHtml(country.name)}" aria-label="${escapeHtml(country.name)}">
+        <th scope="col" data-col-index="0">Habilitador</th>
+        ${view.countries.map((country, idx) => `
+          <th scope="col" title="${escapeHtml(country.name)}" aria-label="${escapeHtml(country.name)}" data-col-index="${idx + 1}">
             <div class="matrix-country-head" title="${escapeHtml(country.name)}" aria-label="${escapeHtml(country.name)}">
               <img class="matrix-country-flag" src="${escapeHtml(getCountryFlagUrl(country, 'w40'))}" alt="" loading="lazy" title="${escapeHtml(country.name)}" />
               <span class="matrix-country-code">${escapeHtml(getCountryIso2(country))}</span>
@@ -455,9 +457,9 @@ function renderMatrix(view) {
             </div>
           </div>
         </th>
-        ${view.countries.map((country) => {
+        ${view.countries.map((country, idx) => {
           const record = state.dataset.recordsByCell.get(`${enabler.key}::${country.iso3}`);
-          return `<td class="matrix-cell-wrap">${record ? buildCell(record) : '<span class="matrix-cell"><span class="matrix-dot matrix-cell--no" aria-hidden="true"></span><span class="matrix-visually-hidden">NO</span></span>'}</td>`;
+          return `<td class="matrix-cell-wrap" data-col-index="${idx + 1}">${record ? buildCell(record) : '<span class="matrix-cell"><span class="matrix-dot matrix-cell--no" aria-hidden="true"></span><span class="matrix-visually-hidden">NO</span></span>'}</td>`;
         }).join('')}
       </tr>
     `).join('')}
@@ -494,6 +496,31 @@ function render() {
   renderActiveFilters();
   renderMatrix(state.view);
   setExportButtonsState(state.view);
+}
+
+/* ── Enhanced Interactions ─────────────────────── */
+function updateCrosshair(trigger, active) {
+  const cellWrap = trigger.closest('.matrix-cell-wrap');
+  if (!cellWrap) return;
+  
+  const row = cellWrap.closest('tr');
+  const colIndex = cellWrap.dataset.colIndex;
+  
+  if (active) {
+    row.classList.add('matrix-row-highlight');
+    if (colIndex) {
+      document.querySelectorAll(`.matrix-cell-wrap[data-col-index="${colIndex}"]`).forEach(el => {
+        el.classList.add('matrix-col-highlight');
+      });
+      document.querySelectorAll(`th[data-col-index="${colIndex}"]`).forEach(el => {
+        el.classList.add('matrix-col-header-highlight');
+      });
+    }
+  } else {
+    document.querySelectorAll('.matrix-row-highlight').forEach(el => el.classList.remove('matrix-row-highlight'));
+    document.querySelectorAll('.matrix-col-highlight').forEach(el => el.classList.remove('matrix-col-highlight'));
+    document.querySelectorAll('.matrix-col-header-highlight').forEach(el => el.classList.remove('matrix-col-header-highlight'));
+  }
 }
 
 /* ── Tooltip ───────────────────────────────────── */
@@ -876,6 +903,22 @@ function bindEvents() {
     if (!trigger) return;
 
     showInfoTooltip(trigger);
+
+    if (trigger.closest('.matrix-cell')) {
+      updateCrosshair(trigger, true);
+    }
+  });
+
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 500) {
+      backToTopBtnEl.classList.remove('hidden');
+    } else {
+      backToTopBtnEl.classList.add('hidden');
+    }
+  }, { passive: true });
+
+  backToTopBtnEl.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
   document.addEventListener('click', (event) => {
@@ -915,6 +958,7 @@ function bindEvents() {
     }
 
     hideInfoTooltip();
+    updateCrosshair(trigger, false);
   });
 
   document.addEventListener('focusin', (event) => {
