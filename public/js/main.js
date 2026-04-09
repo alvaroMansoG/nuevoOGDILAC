@@ -257,21 +257,47 @@ INDICATOR_TOOLTIPS['SI.POV.GINI'] = 'Mide cu\u00E1nto se desv\u00EDa la distribu
 
 const ENABLER_STATUS_META = {
   yes: {
-    label: 'Sí',
+    label: 'SI',
     className: 'status-yes',
-    tooltip: 'Disponible con evidencia',
+    tooltip: 'Habilitador identificado con evidencia',
   },
   no: {
-    label: 'No',
+    label: 'NO',
     className: 'status-no',
     tooltip: 'No identificado',
   },
   in_development: {
-    label: 'En desarrollo',
+    label: 'EN DESARROLLO',
     className: 'status-dev',
     tooltip: 'En proceso de implementación',
   },
 };
+
+function getMainScroller() {
+  const mainContent = document.getElementById('main-content');
+  if (!mainContent) return null;
+
+  const overflowY = window.getComputedStyle(mainContent).overflowY;
+  const isScrollableOverflow = ['auto', 'scroll', 'overlay'].includes(overflowY);
+  const hasOwnScroll = mainContent.scrollHeight > (mainContent.clientHeight + 1);
+
+  return isScrollableOverflow && hasOwnScroll ? mainContent : null;
+}
+
+function getActiveScrollTop() {
+  const scroller = getMainScroller();
+  return scroller ? scroller.scrollTop : (window.scrollY || window.pageYOffset || 0);
+}
+
+function scrollActiveContainerTo(top, behavior = 'smooth') {
+  const scroller = getMainScroller();
+  if (scroller) {
+    scroller.scrollTo({ top, behavior });
+    return;
+  }
+
+  window.scrollTo({ top, behavior });
+}
 
 const GOV_INDEX_META = {
   egdi: { org: 'NACIONES UNIDAS', name: 'Índice de Gobierno Digital (EGDI)', shortName: 'eGOV', scaleMax: 1, hasDimensions: true },
@@ -1183,7 +1209,8 @@ function renderDigitalEnablers(data) {
               </div>
             ${dimension.enablers.map((enabler) => {
               const meta = ENABLER_STATUS_META[enabler.status] || ENABLER_STATUS_META.no;
-              const evidenceHtml = enabler.status === 'yes' && enabler.evidenceUrl
+              const hasEvidenceLink = (enabler.status === 'yes' || enabler.status === 'in_development') && enabler.evidenceUrl;
+              const evidenceHtml = hasEvidenceLink
                 ? `<a class="enabler-link-inline" href="${escapeHtmlAttr(enabler.evidenceUrl)}" title="Abrir evidencia" aria-label="Abrir evidencia" target="_blank" rel="noopener noreferrer">↗ Ver</a>`
                 : '<span class="enabler-link-empty">—</span>';
               return `
@@ -2295,12 +2322,11 @@ function showError(msg) {
 }
 
 // â”€â”€â”€ Load country data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-async function loadCountry(iso) {
-  if (!iso) return;
-  const requestId = ++countryLoadRequestId;
-  selectedIso = iso;
-  const mainScroller = document.getElementById('main-content');
-  const preservedScrollTop = mainScroller ? mainScroller.scrollTop : window.scrollY;
+  async function loadCountry(iso) {
+    if (!iso) return;
+    const requestId = ++countryLoadRequestId;
+    selectedIso = iso;
+    const preservedScrollTop = getActiveScrollTop();
 
   // Sync dropdown
   selectEl.value = iso;
@@ -2350,12 +2376,8 @@ async function loadCountry(iso) {
       bidProjectsController.setError('No se pudieron cargar los proyectos BID.', data.country);
     }
 
-    if (mainScroller) {
-      mainScroller.scrollTop = preservedScrollTop;
-    } else {
-      window.scrollTo({ top: preservedScrollTop, behavior: 'auto' });
-    }
-  } catch (err) {
+      scrollActiveContainerTo(preservedScrollTop, 'auto');
+    } catch (err) {
     if (requestId !== countryLoadRequestId) return;
     console.error(err);
     bidProjectsController.setError('No se pudieron cargar los proyectos BID.', {
@@ -2729,25 +2751,17 @@ function scrollSectionHeaderIntoView(target) {
   const header = target.querySelector('.section-header') || target;
   const mainHeaderEl = document.getElementById('main-header');
   const topNavEl = document.querySelector('.section-nav-bar--ficha');
-  const scroller = document.getElementById('main-content');
+  const scroller = getMainScroller();
   const stickyOffset = (mainHeaderEl?.offsetHeight || 0) + (topNavEl?.offsetHeight || 0) + 12;
   const top = scroller
     ? Math.max(0, scroller.scrollTop + header.getBoundingClientRect().top - scroller.getBoundingClientRect().top - stickyOffset)
-    : Math.max(0, window.scrollY + header.getBoundingClientRect().top - stickyOffset);
-  if (scroller) {
-    scroller.scrollTo({ top, behavior: 'smooth' });
-  } else {
-    window.scrollTo({ top, behavior: 'smooth' });
-  }
+    : Math.max(0, getActiveScrollTop() + header.getBoundingClientRect().top - stickyOffset);
+
+  scrollActiveContainerTo(top, 'smooth');
 }
 
 function scrollToPageTop() {
-  const scroller = document.getElementById('main-content');
-  if (scroller) {
-    scroller.scrollTo({ top: 0, behavior: 'smooth' });
-    return;
-  }
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  scrollActiveContainerTo(0, 'smooth');
 }
 
 function setupSectionCollapseUi() {

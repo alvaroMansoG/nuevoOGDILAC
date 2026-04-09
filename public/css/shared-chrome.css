@@ -243,10 +243,13 @@ body.page-ficha .site-ftr-partners {
 body.page-ficha .ficha-sticky-top {
   position: sticky;
   top: 0;
-  z-index: 15;
+  z-index: 60;
   flex-shrink: 0;
   align-self: stretch;
   width: 100%;
+  background: rgba(255,255,255,.96);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 10px 24px rgba(14,48,77,.08);
 }
 
 body.page-ficha .ficha-sticky-top .main-header {
