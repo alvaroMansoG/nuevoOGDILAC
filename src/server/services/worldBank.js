@@ -3,10 +3,10 @@ const { fetchJsonWithRetry } = require('../utils/http');
 const { REGION_ISO_CODES, WORLD_BANK_REGION_COUNTRY_PATH } = require('../data/countries');
 const { buildIndicatorRanking } = require('../domain/rankings');
 
-const indicatorRegionCache = createTimedStore();
-const countryMetadataCache = createTimedStore();
-const INDICATOR_REGION_TTL = 30 * 60 * 1000;
-const COUNTRY_METADATA_TTL = 24 * 60 * 60 * 1000;
+const indicatorRegionCache = createTimedStore({ persistKey: 'worldbank-region-indicators' });
+const countryMetadataCache = createTimedStore({ persistKey: 'worldbank-country-metadata' });
+const INDICATOR_REGION_TTL = 30 * 24 * 60 * 60 * 1000;
+const COUNTRY_METADATA_TTL = 30 * 24 * 60 * 60 * 1000;
 
 function translateWorldBankIncomeLevel(value) {
   const normalized = String(value || '').trim().toLowerCase();
@@ -23,6 +23,7 @@ async function fetchWorldBankCountryMetadata(isoCode) {
   const cacheKey = `wb-country:${isoCode}`;
   const cached = getTimedCache(countryMetadataCache, cacheKey, COUNTRY_METADATA_TTL);
   if (cached) return cached;
+  const staleCached = getTimedCache(countryMetadataCache, cacheKey, COUNTRY_METADATA_TTL, { allowStale: true });
 
   try {
     const url = `https://api.worldbank.org/v2/country/${isoCode}?format=json`;
@@ -35,6 +36,10 @@ async function fetchWorldBankCountryMetadata(isoCode) {
     return metadata;
   } catch (err) {
     console.error(`Error fetching World Bank country metadata for ${isoCode}:`, err.message);
+    if (staleCached) {
+      console.warn(`Usando cache vencida de World Bank country metadata para ${isoCode}.`);
+      return staleCached;
+    }
     return { incomeLevel: null };
   }
 }
@@ -53,33 +58,42 @@ async function fetchWorldBankRegionIndicator(indicatorCode) {
   const cacheKey = `wb:${indicatorCode}`;
   const cached = getTimedCache(indicatorRegionCache, cacheKey, INDICATOR_REGION_TTL);
   if (cached) return cached;
+  const staleCached = getTimedCache(indicatorRegionCache, cacheKey, INDICATOR_REGION_TTL, { allowStale: true });
 
-  const url = `https://api.worldbank.org/v2/country/${WORLD_BANK_REGION_COUNTRY_PATH}/indicator/${indicatorCode}?format=json&mrv=5&per_page=500`;
-  const json = await fetchJsonWithRetry(url, {}, { label: `World Bank regional indicator ${indicatorCode}` });
-  const rows = Array.isArray(json) && Array.isArray(json[1]) ? json[1] : [];
-  const byIso = Object.fromEntries(
-    REGION_ISO_CODES.map((iso) => [iso, { value: null, date: null, source: 'Banco Mundial' }])
-  );
+  try {
+    const url = `https://api.worldbank.org/v2/country/${WORLD_BANK_REGION_COUNTRY_PATH}/indicator/${indicatorCode}?format=json&mrv=5&per_page=500`;
+    const json = await fetchJsonWithRetry(url, {}, { label: `World Bank regional indicator ${indicatorCode}` });
+    const rows = Array.isArray(json) && Array.isArray(json[1]) ? json[1] : [];
+    const byIso = Object.fromEntries(
+      REGION_ISO_CODES.map((iso) => [iso, { value: null, date: null, source: 'Banco Mundial' }])
+    );
 
-  for (const row of rows) {
-    const iso = row?.countryiso3code;
-    if (!iso || !Object.prototype.hasOwnProperty.call(byIso, iso)) continue;
-    if (byIso[iso].value != null) continue;
-    if (row.value == null) continue;
+    for (const row of rows) {
+      const iso = row?.countryiso3code;
+      if (!iso || !Object.prototype.hasOwnProperty.call(byIso, iso)) continue;
+      if (byIso[iso].value != null) continue;
+      if (row.value == null) continue;
 
-    byIso[iso] = {
-      value: row.value,
-      date: row.date ?? null,
-      source: 'Banco Mundial',
+      byIso[iso] = {
+        value: row.value,
+        date: row.date ?? null,
+        source: 'Banco Mundial',
+      };
+    }
+
+    const data = {
+      byIso,
+      rankMap: buildIndicatorRanking(byIso, indicatorCode),
     };
+    setTimedCache(indicatorRegionCache, cacheKey, data);
+    return data;
+  } catch (err) {
+    if (staleCached) {
+      console.warn(`Usando cache vencida de World Bank regional indicator ${indicatorCode}: ${err.message}`);
+      return staleCached;
+    }
+    throw err;
   }
-
-  const data = {
-    byIso,
-    rankMap: buildIndicatorRanking(byIso, indicatorCode),
-  };
-  setTimedCache(indicatorRegionCache, cacheKey, data);
-  return data;
 }
 
 module.exports = {

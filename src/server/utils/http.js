@@ -26,13 +26,17 @@ async function fetchJsonWithRetry(url, options = {}, config = {}) {
     attempts = 5,
     baseDelayMs = 300,
     label = 'HTTP request',
+    timeoutMs = 15000,
   } = config;
 
   let lastError = null;
 
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
     try {
-      const res = await fetch(url, options);
+      const res = await fetch(url, { ...options, signal: controller.signal });
       const contentType = String(res.headers.get('content-type') || '').toLowerCase();
 
       if (!res.ok) {
@@ -56,13 +60,18 @@ async function fetchJsonWithRetry(url, options = {}, config = {}) {
       return await res.json();
     } catch (err) {
       lastError = err;
+      if (err?.name === 'AbortError') {
+        lastError = new Error(`${label} timed out after ${timeoutMs}ms`);
+      }
 
       if (attempt >= attempts || !isRetryableError(err)) {
-        throw err;
+        throw lastError;
       }
 
       const delayMs = baseDelayMs * (2 ** (attempt - 1));
       await wait(delayMs);
+    } finally {
+      clearTimeout(timeout);
     }
   }
 

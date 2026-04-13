@@ -21,7 +21,7 @@ const { fetchCountryTrustProviders, fetchRegionalTrustProviders } = require('../
 const { fetchUndpRegionIndicator } = require('../services/undp');
 const { fetchBidProjectsByIso } = require('../services/bidProjects');
 
-const responseCache = createMemoryCache(5 * 60 * 1000);
+const responseCache = createMemoryCache(60 * 60 * 1000);
 const INDICATOR_FETCH_CONCURRENCY = 4;
 
 async function mapSettledWithConcurrency(items, limit, mapper) {
