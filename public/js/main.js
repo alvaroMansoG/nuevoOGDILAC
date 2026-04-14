@@ -1,4 +1,10 @@
-﻿import { fetchCountries, fetchCountryData } from './api.js';
+import { fetchCountries, fetchCountryData } from './api.js';
+import {
+  GOV_COMPONENT_LABELS_BY_SLUG,
+  GOV_INDEX_META_BY_SLUG,
+  INDEX_ORDER_BY_SLUG,
+  getGovSourceLinks,
+} from './gov/catalog.js';
 
 /* ============================================
    app.js â€” D3 map + indicator dashboard
@@ -299,14 +305,12 @@ function scrollActiveContainerTo(top, behavior = 'smooth') {
   window.scrollTo({ top, behavior });
 }
 
-const GOV_INDEX_META = {
-  egdi: { org: 'NACIONES UNIDAS', name: 'Índice de Gobierno Digital (EGDI)', shortName: 'eGOV', scaleMax: 1, hasDimensions: true },
-  gtmi: { org: 'BANCO MUNDIAL', name: 'Índice de Madurez GovTech (GTMI)', shortName: 'GovTech', scaleMax: 1, hasDimensions: true },
-  gci: { org: 'ITU', name: 'Índice global de ciberseguridad (GCI)', shortName: 'Ciberseguridad', scaleMax: 100, hasDimensions: true },
-  ocde: { org: 'OCDE/BID', name: 'Índice de Gobierno Digital de America Latina y el Caribe', shortName: 'Gobierno Digital', scaleMax: 1, hasDimensions: true },
-  ai: { org: 'OXFORD INSIGHTS', name: 'Índice de Madurez IA (AI Readiness)', shortName: 'Madurez IA', scaleMax: 100, hasDimensions: true },
-  nri: { org: 'PORTULANS', name: 'Índice de Preparación de la Red (NRI)', shortName: 'Preparación Red', scaleMax: 100, hasDimensions: true },
-};
+const GOV_INDEX_META = Object.fromEntries(
+  Object.entries(GOV_INDEX_META_BY_SLUG).map(([slug, meta]) => [
+    slug,
+    { ...meta, hasDimensions: true },
+  ]),
+);
 
 function getGovSubindexScaleMax(indexKey) {
   if (indexKey === 'gci') return 20;
@@ -314,7 +318,7 @@ function getGovSubindexScaleMax(indexKey) {
 }
 
 function getGovRadarNormalizationNote() {
-  return 'Cada índice se normaliza sobre su escala teórica máxima para llevarlo a una escala común de 0 a 1 en el radar. EGDI, GTMI e IGD usan 0-1; GCI, AI Readiness y NRI usan 0-100.';
+  return 'Cada índice se normaliza sobre su escala teórica máxima para llevarlo a una escala común de 0 a 1 en el radar. EGDI, GTMI y DGI usan 0-1; Ciberseguridad, Madurez IA y Madurez Redes usan 0-100.';
 }
 
 function getGovHistoryNormalizationNote() {
@@ -401,14 +405,14 @@ function getDimensionScaleNote(indexKey) {
   const notes = {
     egdi: 'Subíndices EGDI en escala de 0 a 1.',
     gtmi: 'Pilares GTMI en escala de 0 a 1.',
-    gci: 'Pilares GCI en escala de 0 a 20.',
-    ocde: 'Dimensiones IGD en escala de 0 a 1.',
-    ai: 'Pilares AI Readiness en escala de 0 a 100.',
-    nri: 'Pilares NRI en escala de 0 a 100.',
+    gci: 'Pilares de Ciberseguridad en escala de 0 a 20.',
+    ocde: 'Dimensiones DGI en escala de 0 a 1.',
+    ai: 'Pilares de Madurez IA en escala de 0 a 100.',
+    nri: 'Pilares de Madurez Redes en escala de 0 a 100.',
   };
   return notes[indexKey] || 'Las subdimensiones se muestran en su escala original.';
 }
-const GOV_INDEX_ORDER = ['egdi', 'gtmi', 'gci', 'ocde', 'ai', 'nri'];
+const GOV_INDEX_ORDER = INDEX_ORDER_BY_SLUG;
 const GOV_GROUP_META = {
   egdi: {
     VHEGDI: { label: 'Nivel Muy Alto', color: '#0B5E55', icon: 'star', tooltip: 'Desempeño digital de referencia' },
@@ -431,48 +435,7 @@ const GOV_GROUP_META = {
   },
 };
 
-const GOV_SUBINDEX_LABELS = {
-  egdi: {
-    osi: 'Servicios en l\u00EDnea (OSI)',
-    tii: 'Infraestructura de telecomunicaciones (TII)',
-    hci: 'Capital humano (HCI)',
-  },
-  gtmi: {
-    cgsi: 'Sistemas b\u00E1sicos (CGSI)',
-    psdi: 'Portales y servicios (PSDI)',
-    dcei: 'Habilitadores digitales (DCEI)',
-    gtei: 'Entorno GovTech (GTEI)',
-  },
-  gci: {
-    legal: 'Marco legal',
-    technical: 'Medidas t\u00E9cnicas',
-    organizational: 'Medidas organizacionales',
-    capacity: 'Desarrollo de capacidades',
-    cooperation: 'Cooperaci\u00F3n',
-  },
-  ocde: {
-    dd: 'Digital por dise\u00F1o',
-    id: 'Impulsado por los datos',
-    gp: 'Gobierno como plataforma',
-    ad: 'Abierto por defecto',
-    iu: 'Dirigido por el usuario',
-    pr: 'Proactivo',
-  },
-  ai: {
-    policyCapacity: 'Capacidad de pol\u00EDtica p\u00FAblica',
-    aiInfrastructure: 'Infraestructura para IA',
-    governance: 'Gobernanza',
-    publicSectorAdoption: 'Adopci\u00F3n en el sector p\u00FAblico',
-    developmentDiffusion: 'Desarrollo y difusi\u00F3n',
-    resilience: 'Resiliencia',
-  },
-  nri: {
-    technology: 'Tecnolog\u00EDa',
-    people: 'Personas',
-    governance: 'Gobernanza',
-    impact: 'Impacto',
-  },
-};
+const GOV_SUBINDEX_LABELS = GOV_COMPONENT_LABELS_BY_SLUG;
 
 const GOV_SUBINDEX_COLORS = ['#6b52c2', '#d14f61', '#68c7be', '#f0a03a', '#4f88e8', '#7f64c8'];
 
@@ -515,45 +478,45 @@ function getRadarAbbreviatedLabel(indexKey, label, index) {
   const base = String(label || '').trim();
   if (indexKey === 'egdi') {
     const egdiMap = {
-      'Servicios en línea (OSI)': 'OSI',
-      'Infraestructura de telecomunicaciones (TII)': 'TII',
-      'Capital humano (HCI)': 'HCI',
+      'Online Service Index (OSI)': 'OSI',
+      'Telecommunication Infrastructure Index (TII)': 'TII',
+      'Human Capital Index (HCI)': 'HCI',
     };
     return `${index + 1}. ${egdiMap[base] || base}`;
   }
   if (indexKey === 'gtmi') {
     const gtmiMap = {
-      'Sistemas básicos (CGSI)': 'CGSI',
-      'Portales y servicios (PSDI)': 'PSDI',
-      'Habilitadores digitales (DCEI)': 'DCEI',
-      'Entorno GovTech (GTEI)': 'GTEI',
+      'Sistemas centrales de gobierno e infraestructura digital compartida (CGSI)': 'CGSI',
+      'Prestación de servicios públicos en línea (PSDI)': 'PSDI',
+      'Participación y compromiso digital de la ciudadanía (DCEI)': 'DCEI',
+      'Habilitadores GovTech (GTEI)': 'GTEI',
     };
     return `${index + 1}. ${gtmiMap[base] || base}`;
   }
   const compactMap = {
-    'Servicios en línea (OSI)': 'Serv. en línea',
-    'Infraestructura de telecomunicaciones (TII)': 'Infraestr. telecom.',
-    'Capital humano (HCI)': 'Capital humano',
-    'Sistemas básicos (CGSI)': 'Sist. básicos',
-    'Portales y servicios (PSDI)': 'Portales y serv.',
-    'Habilitadores digitales (DCEI)': 'Hab. digitales',
-    'Entorno GovTech (GTEI)': 'Entorno GovTech',
-    'Marco legal': 'Marco legal',
+    'Online Service Index (OSI)': 'OSI',
+    'Telecommunication Infrastructure Index (TII)': 'TII',
+    'Human Capital Index (HCI)': 'HCI',
+    'Sistemas centrales de gobierno e infraestructura digital compartida (CGSI)': 'Sist. centrales',
+    'Prestación de servicios públicos en línea (PSDI)': 'Serv. en línea',
+    'Participación y compromiso digital de la ciudadanía (DCEI)': 'Partic. digital',
+    'Habilitadores GovTech (GTEI)': 'Hab. GovTech',
+    'Medidas legales': 'Medidas legales',
     'Medidas técnicas': 'Medidas técnicas',
-    'Medidas organizacionales': 'Med. organizac.',
-    'Desarrollo de capacidades': 'Desarr. capacidades',
+    'Medidas organizacionales': 'Med. organiz.',
+    'Desarrollo de capacidades': 'Capacidades',
     'Cooperación': 'Cooperación',
-    'Digital por diseño': 'Digital diseño',
-    'Impulsado por los datos': 'Impulso datos',
+    'Digital desde el diseño': 'Diseño digital',
+    'Impulsado por los datos': 'Datos',
     'Gobierno como plataforma': 'Gob. plataforma',
-    'Abierto por defecto': 'Abierto defecto',
-    'Dirigido por el usuario': 'Usuario',
-    'Proactivo': 'Proactivo',
-    'Capacidad de política pública': 'Cap. política',
-    'Infraestructura para IA': 'Infraestr. IA',
+    'Apertura por defecto': 'Apertura',
+    'Impulsado por los usuarios': 'Usuarios',
+    'Proactividad': 'Proactividad',
+    'Capacidad de políticas': 'Políticas',
+    'Infraestructura de IA': 'Infraestr. IA',
     'Gobernanza': 'Gobernanza',
     'Adopción en el sector público': 'Adopción pública',
-    'Desarrollo y difusión': 'Desarr. difusión',
+    'Desarrollo y difusión': 'Des. difusión',
     'Resiliencia': 'Resiliencia',
     'Tecnología': 'Tecnología',
     'Personas': 'Personas',
@@ -1530,27 +1493,11 @@ function buildPositionBar(scores, currentIso, countryName, alcAvg, allNames, isC
 
 // â”€â”€â”€ Rich E-Government index card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function getGovOrgBadge(clsKey, org) {
-  const map = {
-    egdi: 'ONU',
-    gtmi: 'BM',
-    gci: 'ITU',
-    ocde: 'BID',
-    ai: 'OI',
-    nri: 'NRI',
-  };
-  return map[clsKey] || org;
+  return GOV_INDEX_META[clsKey]?.orgBadge || org;
 }
 
 function getGovOrgTooltip(clsKey, org) {
-  const map = {
-    egdi: '\u00CDndice elaborado por Naciones Unidas.',
-    gtmi: '\u00CDndice elaborado por el Banco Mundial.',
-    gci: '\u00CDndice elaborado por la Uni\u00F3n Internacional de Telecomunicaciones.',
-    ocde: '\u00CDndice de referencia BID/OCDE para gobierno digital.',
-    ai: '\u00CDndice elaborado por Oxford Insights.',
-    nri: '\u00CDndice elaborado por Portulans Institute.',
-  };
-  return map[clsKey] || `\u00CDndice elaborado por ${org}.`;
+  return GOV_INDEX_META[clsKey]?.orgTooltip || `\u00CDndice elaborado por ${org}.`;
 }
 
 function hexToRgba(hex, alpha = 1) {
@@ -1572,17 +1519,26 @@ function getGovGroupMeta(clsKey, value) {
   const text = fixText(String(value)).toUpperCase();
 
   if (clsKey === 'egdi') {
-    return GOV_GROUP_META.egdi[text] || null;
+    if (GOV_GROUP_META.egdi[text]) return GOV_GROUP_META.egdi[text];
+    if (text === 'MUY ALTO') return GOV_GROUP_META.egdi.VHEGDI;
+    if (text === 'ALTO') return GOV_GROUP_META.egdi.HEGDI;
+    if (text === 'MEDIO') return GOV_GROUP_META.egdi.MEGDI;
+    if (text === 'BAJO') return GOV_GROUP_META.egdi.LEGDI;
   }
 
   if (clsKey === 'gtmi') {
-    if (text === 'A' || /GROUP\s*A\b/.test(text) || text.includes('LEADER')) return GOV_GROUP_META.gtmi.A;
-    if (text === 'B' || /GROUP\s*B\b/.test(text) || text.includes('SIGNIFICANT')) return GOV_GROUP_META.gtmi.B;
-    if (text === 'C' || /GROUP\s*C\b/.test(text) || text.includes('CERTAIN')) return GOV_GROUP_META.gtmi.C;
-    if (text === 'D' || /GROUP\s*D\b/.test(text) || text.includes('MINIMAL')) return GOV_GROUP_META.gtmi.D;
+    if (text === 'A' || /GROUP\s*A\b/.test(text) || /GRUPO\s*A\b/.test(text) || text.includes('LEADER')) return GOV_GROUP_META.gtmi.A;
+    if (text === 'B' || /GROUP\s*B\b/.test(text) || /GRUPO\s*B\b/.test(text) || text.includes('SIGNIFICANT')) return GOV_GROUP_META.gtmi.B;
+    if (text === 'C' || /GROUP\s*C\b/.test(text) || /GRUPO\s*C\b/.test(text) || text.includes('CERTAIN')) return GOV_GROUP_META.gtmi.C;
+    if (text === 'D' || /GROUP\s*D\b/.test(text) || /GRUPO\s*D\b/.test(text) || text.includes('MINIMAL')) return GOV_GROUP_META.gtmi.D;
   }
 
   if (clsKey === 'gci') {
+    if (text === 'T1') return GOV_GROUP_META.gci[1];
+    if (text === 'T2') return GOV_GROUP_META.gci[2];
+    if (text === 'T3') return GOV_GROUP_META.gci[3];
+    if (text === 'T4') return GOV_GROUP_META.gci[4];
+    if (text === 'T5') return GOV_GROUP_META.gci[5];
     if (/TIER\s*1\b/.test(text)) return GOV_GROUP_META.gci[1];
     if (/TIER\s*2\b/.test(text)) return GOV_GROUP_META.gci[2];
     if (/TIER\s*3\b/.test(text)) return GOV_GROUP_META.gci[3];
@@ -1599,7 +1555,7 @@ function getGovGroupLabel(clsKey, value) {
   if (!value) return '\u2014';
   if (clsKey === 'egdi') {
     const map = { VHEGDI: 'Muy alto', HEGDI: 'Alto', MEGDI: 'Medio', LEGDI: 'Bajo' };
-    return map[value] || value;
+    return map[value] || String(value);
   }
   if (clsKey === 'gtmi') {
     const text = String(value);
@@ -1617,7 +1573,7 @@ function getGovGroupTooltip(clsKey, value) {
   if (meta) return meta.tooltip;
   if (!value) return 'No hay grupo disponible para este \u00EDndice.';
   if (clsKey === 'egdi') {
-    return 'Clasificaci\u00F3n EGDI: VHEGDI = Muy alto, HEGDI = Alto, MEGDI = Medio, LEGDI = Bajo.';
+    return 'Clasificaci\u00F3n EGDI: Muy alto, Alto, Medio o Bajo.';
   }
   if (clsKey === 'gtmi') {
     return `Clasificaci\u00F3n GTMI reportada por el Banco Mundial: ${value}.`;
@@ -1637,6 +1593,37 @@ function formatGovRank(rank, withMedal = false) {
 
 function getGovIndexDisplayName(indexKey) {
   return GOV_INDEX_META[indexKey]?.shortName || indexKey.toUpperCase();
+}
+
+function initializeGovUiLabels() {
+  $$('.dim-tab').forEach((tab) => {
+    const meta = GOV_INDEX_META[tab.dataset.index];
+    if (!meta) return;
+    const titleEl = tab.querySelector('.dim-tab-title');
+    const subEl = tab.querySelector('.dim-tab-sub');
+    if (titleEl) titleEl.textContent = meta.shortName;
+    if (subEl) subEl.textContent = meta.org;
+    tab.title = meta.tooltip;
+    tab.setAttribute('aria-label', `${meta.shortName}. ${meta.tooltip}`);
+  });
+
+  const activeIndexLabel = $('#dim-active-index-name');
+  if (activeIndexLabel && GOV_INDEX_META[activeDimIndex]) {
+    activeIndexLabel.textContent = GOV_INDEX_META[activeDimIndex].shortName;
+  }
+
+  const govLinksEl = $('#gov-links');
+  if (govLinksEl) {
+    govLinksEl.innerHTML = [
+      '<span>Fuentes:</span>',
+      ...getGovSourceLinks().flatMap((link, index) => {
+        const slug = link.slug;
+        const meta = GOV_INDEX_META[slug];
+        const anchor = `<a href="${escapeHtmlAttr(link.url)}" target="_blank" rel="noopener noreferrer" title="${escapeHtmlAttr(meta?.tooltip || link.label)}">${escapeHtml(link.label)}</a>`;
+        return index === 0 ? [anchor] : ['<span>&middot;</span>', anchor];
+      }),
+    ].join('');
+  }
 }
 
 function getCurrentGovYear(indexKey, indexData) {
@@ -1689,7 +1676,7 @@ function getGovHeaderRows(indexKey, entry, isRegionAggregate = false) {
         label: 'Ranking BID',
         value: rankAlcText,
         kind: 'rank',
-        tooltip: 'Posicion del pais dentro del indice BID/OCDE para America Latina y el Caribe.',
+        tooltip: 'Posición del país dentro del índice para América Latina y el Caribe.',
       },
     ];
   }
@@ -1711,13 +1698,13 @@ function getGovHeaderRows(indexKey, entry, isRegionAggregate = false) {
       label: 'Ranking mundial',
       value: rankWorldText,
       kind: 'rank',
-      tooltip: 'Posicion del pais en el ranking mundial del indice para el ano seleccionado.',
+      tooltip: 'Posición del país en el ranking mundial del índice para el año seleccionado.',
     });
   rows.push({
       label: 'Ranking ALC',
       value: rankAlcText,
       kind: 'rank',
-      tooltip: 'Posicion del pais dentro de America Latina y el Caribe para el ano seleccionado. Los puestos 1, 2 y 3 muestran medalla.',
+      tooltip: 'Posición del país dentro de América Latina y el Caribe para el año seleccionado. Los puestos 1, 2 y 3 muestran medalla.',
     });
 
   return rows;
@@ -1751,7 +1738,8 @@ function buildGovCard({ indexKey, indexData, countryName, countryIso, allAlcName
         <div class="gov-card-org-logo ${indexKey}" title="${escapeHtmlAttr(getGovOrgTooltip(indexKey, meta.org))}" aria-label="${escapeHtmlAttr(getGovOrgTooltip(indexKey, meta.org))}">${orgBadge}</div>
         <div class="gov-card-title-wrap">
           <div class="gov-card-org">${meta.org}</div>
-          <div class="gov-card-name">${meta.name}</div>
+          <div class="gov-card-name" title="${escapeHtmlAttr(meta.tooltip)}" aria-label="${escapeHtmlAttr(meta.tooltip)}">${meta.shortName}</div>
+          <div class="gov-card-subname">${meta.name}</div>
           <div class="gov-card-year-row">
             <span class="gov-card-year-label">Serie hist\u00F3rica</span>
             <select class="gov-card-year-select" data-gov-index="${indexKey}" aria-label="Seleccionar ano de ${meta.name}">
@@ -2627,6 +2615,7 @@ function highlightCountry(iso) {
 async function init() {
   try {
     setupSectionCollapseUi();
+    initializeGovUiLabels();
     countries = await fetchCountries();
 
     countries.forEach(c => {
@@ -2800,10 +2789,10 @@ function getGovMethodTooltip(clsKey, countryIso, year = null) {
   const map = {
     egdi: `Promedio regional del EGDI para ${year || 'el a\u00F1o seleccionado'}. Los sub\u00EDndices tambi\u00E9n se muestran como promedios regionales.`,
     gtmi: `Promedio regional del GTMI para ${year || 'el a\u00F1o seleccionado'}. Los sub\u00EDndices tambi\u00E9n se muestran como promedios regionales.`,
-    gci: `Promedio regional del GCI para ${year || 'el a\u00F1o seleccionado'}.`,
-    ocde: `Promedio regional del \u00EDndice OCDE/BID y de sus dimensiones para ${year || 'el a\u00F1o seleccionado'}.`,
-    ai: `Promedio regional del Government AI Readiness Index para ${year || 'el a\u00F1o seleccionado'}.`,
-    nri: `Promedio regional del Network Readiness Index para ${year || 'el a\u00F1o seleccionado'}, con pa\u00EDses disponibles.`,
+    gci: `Promedio regional de Ciberseguridad para ${year || 'el a\u00F1o seleccionado'}.`,
+    ocde: `Promedio regional del DGI y de sus dimensiones para ${year || 'el a\u00F1o seleccionado'}.`,
+    ai: `Promedio regional de Madurez IA para ${year || 'el a\u00F1o seleccionado'}.`,
+    nri: `Promedio regional de Madurez Redes para ${year || 'el a\u00F1o seleccionado'}, con pa\u00EDses disponibles.`,
   };
 
   return map[clsKey] || 'Promedio regional del indicador para los 26 pa\u00EDses de ALC.';
@@ -2817,9 +2806,10 @@ function getDimensionMethodTooltip(tabKey, isRegionAggregate, year = null) {
   const map = {
     egdi: `Cada dimensi\u00F3n muestra el promedio regional del sub\u00EDndice EGDI correspondiente para ${year || 'el a\u00F1o seleccionado'}.`,
     gtmi: `Cada dimensi\u00F3n muestra el promedio regional del sub\u00EDndice GTMI correspondiente para ${year || 'el a\u00F1o seleccionado'}.`,
-    gci: `Cada dimensi\u00F3n muestra el pilar GCI correspondiente para ${year || 'el a\u00F1o seleccionado'}, a partir de Data360 del Banco Mundial.`,
-    ocde: `Cada dimensi\u00F3n muestra el promedio regional del sub\u00EDndice OCDE/BID correspondiente para ${year || 'el a\u00F1o seleccionado'}.`,
-    nri: `Cada pilar muestra el promedio regional del NRI para ${year || 'el a\u00F1o seleccionado'}, con pa\u00EDses disponibles.`,
+    gci: `Cada dimensi\u00F3n muestra el pilar de Ciberseguridad correspondiente para ${year || 'el a\u00F1o seleccionado'}.`,
+    ocde: `Cada dimensi\u00F3n muestra el promedio regional del sub\u00EDndice DGI correspondiente para ${year || 'el a\u00F1o seleccionado'}.`,
+    ai: `Cada dimensi\u00F3n muestra el pilar de Madurez IA correspondiente para ${year || 'el a\u00F1o seleccionado'}.`,
+    nri: `Cada pilar muestra el promedio regional de Madurez Redes para ${year || 'el a\u00F1o seleccionado'}, con pa\u00EDses disponibles.`,
   };
 
   return map[tabKey] || 'Promedio regional de la dimensi\u00F3n para los 26 pa\u00EDses de ALC.';

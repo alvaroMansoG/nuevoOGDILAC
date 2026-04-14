@@ -1645,8 +1645,13 @@ a:hover { color: var(--bid-azul); }
   overflow: hidden;
 }
 
+.gov-dimensions-section .section-header {
+  margin-bottom: 0;
+  padding: 1rem 1.1rem 0;
+}
+
 .gov-dim-container {
-  padding: 1.5rem;
+  padding: 1rem 1.1rem 1.15rem;
 }
 
 /* Tabs */

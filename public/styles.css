@@ -2641,10 +2641,16 @@ html {
   margin-bottom: .08rem;
 }
 .gov-card-name {
-  font-size: .92rem;
-  font-weight: 700;
-  margin: 0 0 .12rem;
+  font-size: 1rem;
+  font-weight: 800;
+  margin: 0;
   color: var(--text-primary);
+}
+.gov-card-subname {
+  font-size: .7rem;
+  line-height: 1.35;
+  color: var(--text-secondary);
+  margin-top: .1rem;
 }
 .gov-card-year-row {
   display: inline-flex;
@@ -2897,8 +2903,13 @@ html {
   overflow: hidden;
 }
 
+.gov-dimensions-section .section-header {
+  margin-bottom: 0;
+  padding: 1rem 1.1rem 0;
+}
+
 .gov-dim-container {
-  padding: 1.5rem;
+  padding: 1rem 1.1rem 1.15rem;
 }
 
 /* Tabs */
