@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OGDILAC &mdash; Indicadores Internacionales de Transformación Digital</title>
+  <meta name="description" content="Rankings, comparativas y análisis de los principales índices internacionales de gobierno digital para América Latina y el Caribe." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/shared-chrome.css" />
+  <link rel="stylesheet" href="css/indicadores.css" />
+  <link rel="stylesheet" href="https://www.iadb.org/modules/custom/api_menu_items/V.0.0.5/css/idb-tailwind.css?v=0.0.1" />
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://www.iadb.org/modules/custom/api_menu_items/V.0.0.5/js/main.js?v=0.0.1" defer></script>
+</head>
+<body class="page-indicadores">
+
+  <!-- BREADCRUMB -->
+  <nav class="breadcrumb" aria-label="Navegación">
+    <div class="breadcrumb-inner">
+      <a href="/" class="breadcrumb-link">Inicio</a>
+      <span class="breadcrumb-sep" aria-hidden="true">&rsaquo;</span>
+      <a href="/#indicadores" class="breadcrumb-link">Indicadores</a>
+      <span class="breadcrumb-sep" aria-hidden="true">&rsaquo;</span>
+      <span class="breadcrumb-current">&Iacute;ndices Internacionales</span>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="ind-hero" id="top">
+    <div class="ind-hero-inner">
+      <div class="ind-hero-top-row">
+        <span class="ind-hero-badge">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+          Observatorio de Gobierno Digital
+        </span>
+      </div>
+
+      <h1 class="ind-hero-title">&Iacute;ndices Internacionales de Transformaci&oacute;n Digital</h1>
+      <p class="ind-hero-subtitle">Explora rankings regionales, compara pa&iacute;ses y descarga datos abiertos sobre gobierno digital, ciberseguridad, inteligencia artificial y preparaci&oacute;n tecnol&oacute;gica en Am&eacute;rica Latina.</p>
+
+      <!-- View mode navigation -->
+      <nav class="ind-view-tabs" aria-label="Modo de exploración">
+        <button type="button" class="ind-view-tab active" data-view="ranking">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+          <span class="ind-view-tab-label">Ranking regional</span>
+          <span class="ind-view-tab-desc">Posiciones y puntuaciones</span>
+        </button>
+        <button type="button" class="ind-view-tab" data-view="compare">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
+          <span class="ind-view-tab-label">Comparar pa&iacute;ses</span>
+          <span class="ind-view-tab-desc">Side-by-side anal&iacute;tico</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- STICKY BAR (visible on scroll) -->
+  <div class="ind-sticky-bar" id="ind-sticky-bar">
+    <div class="ind-sticky-bar-inner">
+      <div class="ind-sticky-tabs">
+        <button type="button" class="ind-sticky-tab active" data-view="ranking">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+          Ranking regional
+        </button>
+        <button type="button" class="ind-sticky-tab" data-view="compare">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
+          Comparar
+        </button>
+      </div>
+      <div class="ind-sticky-index-layout">
+        <div class="ind-sticky-index-row" id="sticky-index-group"></div>
+        <div class="ind-edition-slot ind-edition-slot--sticky" id="sticky-edition-slot"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <main class="ind-main">
+    <!-- Index selector bar -->
+    <div class="ind-filters">
+      <div class="ind-index-layout">
+        <div class="ind-index-btn-group" id="filter-index-group" role="group" aria-label="Seleccionar índice"></div>
+        <div class="ind-edition-slot" id="filter-edition-slot"></div>
+      </div>
+    </div>
+
+    <!-- Loading state -->
+    <div class="ind-loading" id="ind-loading">
+      <div class="ind-loading-spinner"></div>
+      <div class="ind-loading-text">Cargando indicadores internacionales&hellip;</div>
+    </div>
+
+    <!-- Main content area -->
+    <div id="ind-content" class="hidden"></div>
+  </main>
+
+  <!-- COUNTRY DRAWER -->
+  <div class="ind-drawer-overlay hidden" id="drawer-overlay">
+    <div class="ind-drawer" id="drawer">
+      <div class="ind-drawer-head">
+        <img class="ind-drawer-flag" id="drawer-flag" src="" alt="" />
+        <div style="flex:1;min-width:0">
+          <h2 class="ind-drawer-country-name" id="drawer-country-name"></h2>
+        </div>
+        <div class="ind-drawer-export-wrap" id="drawer-export-wrap">
+          <button type="button" class="ind-drawer-export-btn" id="drawer-export-toggle" aria-haspopup="true" aria-expanded="false" title="Exportar datos del país">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Exportar
+          </button>
+          <div class="ind-drawer-export-dropdown hidden" id="drawer-export-dropdown">
+            <button type="button" class="ind-export-btn" id="drawer-export-xlsx">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Excel
+            </button>
+            <button type="button" class="ind-export-btn" id="drawer-export-csv">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              CSV
+            </button>
+          </div>
+        </div>
+        <button type="button" class="ind-drawer-close" id="drawer-close" aria-label="Cerrar panel">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="ind-drawer-body" id="drawer-body"></div>
+    </div>
+  </div>
+
+  <!-- METHODOLOGY MODAL -->
+  <div class="ind-modal-overlay hidden" id="methodology-overlay">
+    <div class="ind-modal">
+      <div class="ind-modal-head">
+        <h2 class="ind-modal-title">Metodolog&iacute;a y fuentes</h2>
+        <button type="button" class="ind-modal-close" id="methodology-close" aria-label="Cerrar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="ind-modal-body" id="methodology-body"></div>
+    </div>
+  </div>
+
+  <!-- PARTNERS BAR -->
+  <div class="site-ftr-partners">
+    <p class="site-ftr-partners-label"><strong>OGDILAC es un proyecto impulsado por</strong></p>
+    <div class="site-ftr-partners-logos">
+      <a href="https://www.redgealc.org/" class="partner-logo-link" target="_blank" rel="noopener noreferrer">
+        <img src="/img/gealc.png" alt="Red GEALC" class="partner-logo" />
+      </a>
+      <a href="https://administracion.gob.es/" class="partner-logo-link" target="_blank" rel="noopener noreferrer">
+        <img src="/img/spain.svg" alt="Gobierno de Espa&ntilde;a" class="partner-logo" />
+      </a>
+      <a href="https://plus.gov.kr/" class="partner-logo-link" target="_blank" rel="noopener noreferrer">
+        <img src="/img/korea.png" alt="The Government of the Republic of Korea" class="partner-logo" />
+      </a>
+    </div>
+  </div>
+
+  <!-- IDB language config -->
+  <input type="hidden" id="language_IADB" name="language_IADB" value="es">
+  <input type="hidden" id="en_path_IADB" name="en_path_IADB" value="no-link">
+  <input type="hidden" id="es_path_IADB" name="es_path_IADB" value="/indicadores.html">
+  <input type="hidden" id="pt_path_IADB" name="pt_path_IADB" value="no-link">
+  <input type="hidden" id="fr_path_IADB" name="fr_path_IADB" value="no-link">
+
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script type="module" src="js/indicadores.js?v=20260414-ai-fix"></script>
+</body>
+</html>

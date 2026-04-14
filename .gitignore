@@ -8,3 +8,4 @@ Thumbs.db
 data/tmp/
 tmp_*.pdf
 tmp_*.xlsx
+.cache/

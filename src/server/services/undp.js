@@ -4,14 +4,15 @@ const config = require('../config');
 const { REGION_ISO_CODES, UNDP_REGION_COUNTRY_LIST } = require('../data/countries');
 const { buildIndicatorRanking, toFiniteNumber } = require('../domain/rankings');
 
-const indicatorRegionCache = createTimedStore();
-const INDICATOR_REGION_TTL = 30 * 60 * 1000;
+const indicatorRegionCache = createTimedStore({ persistKey: 'undp-region-indicators' });
+const INDICATOR_REGION_TTL = 30 * 24 * 60 * 60 * 1000;
 let warnedAboutUndpConfig = false;
 
 async function fetchUndpRegionIndicator(indicatorCode, getFallbackRankings) {
   const cacheKey = `undp:${indicatorCode.toUpperCase()}`;
   const cached = getTimedCache(indicatorRegionCache, cacheKey, INDICATOR_REGION_TTL);
   if (cached) return cached;
+  const staleCached = getTimedCache(indicatorRegionCache, cacheKey, INDICATOR_REGION_TTL, { allowStale: true });
 
   const { apiKey, baseUrl, years } = config.undp;
   if (!apiKey) {
@@ -28,6 +29,7 @@ async function fetchUndpRegionIndicator(indicatorCode, getFallbackRankings) {
     REGION_ISO_CODES.map((iso) => [iso, { value: null, date: null, source: 'PNUD API' }])
   );
   const targetIndicatorCode = indicatorCode.toUpperCase();
+  let hadSuccessfulFetch = false;
 
   for (const year of years) {
     const url = new URL(`${baseUrl.replace(/\/$/, '')}/CompositeIndices/query`);
@@ -39,6 +41,7 @@ async function fetchUndpRegionIndicator(indicatorCode, getFallbackRankings) {
     try {
       const rows = await fetchJsonWithRetry(url, {}, { label: `PNUD ${indicatorCode} ${year}` });
       if (!Array.isArray(rows)) continue;
+      hadSuccessfulFetch = true;
 
       for (const row of rows) {
         const iso = String(row?.country || '').split(' - ')[0]?.trim()?.toUpperCase();
@@ -61,21 +64,34 @@ async function fetchUndpRegionIndicator(indicatorCode, getFallbackRankings) {
     }
   }
 
-  if (indicatorCode.toLowerCase() === 'hdi') {
-    const fallback = getFallbackRankings('hdi').byIso;
-    for (const iso of REGION_ISO_CODES) {
-      if (byIso[iso].value == null && fallback[iso]?.value != null) {
-        byIso[iso] = fallback[iso];
+  try {
+    if (!hadSuccessfulFetch && staleCached) {
+      console.warn(`Usando cache vencida de PNUD ${indicatorCode} porque la API no devolvio resultados nuevos.`);
+      return staleCached;
+    }
+
+    if (indicatorCode.toLowerCase() === 'hdi') {
+      const fallback = getFallbackRankings('hdi').byIso;
+      for (const iso of REGION_ISO_CODES) {
+        if (byIso[iso].value == null && fallback[iso]?.value != null) {
+          byIso[iso] = fallback[iso];
+        }
       }
     }
-  }
 
-  const data = {
-    byIso,
-    rankMap: buildIndicatorRanking(byIso, indicatorCode),
-  };
-  setTimedCache(indicatorRegionCache, cacheKey, data);
-  return data;
+    const data = {
+      byIso,
+      rankMap: buildIndicatorRanking(byIso, indicatorCode),
+    };
+    setTimedCache(indicatorRegionCache, cacheKey, data);
+    return data;
+  } catch (err) {
+    if (staleCached) {
+      console.warn(`Usando cache vencida de PNUD ${indicatorCode}: ${err.message}`);
+      return staleCached;
+    }
+    throw err;
+  }
 }
 
 module.exports = {

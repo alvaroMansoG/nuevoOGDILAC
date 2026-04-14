@@ -3,13 +3,14 @@ const { fetchJsonWithRetry } = require('../utils/http');
 const { REGION_ISO_CODES } = require('../data/countries');
 const { buildIndicatorRanking, toFiniteNumber } = require('../domain/rankings');
 
-const indicatorRegionCache = createTimedStore();
-const INDICATOR_REGION_TTL = 30 * 60 * 1000;
+const indicatorRegionCache = createTimedStore({ persistKey: 'data360-region-indicators' });
+const INDICATOR_REGION_TTL = 30 * 24 * 60 * 60 * 1000;
 
 async function fetchData360RegionIndicator(databaseId, indicatorId, fallbackFetcher = null, sourceLabel = 'Data360 del Banco Mundial') {
   const cacheKey = `data360:${databaseId}:${indicatorId}`;
   const cached = getTimedCache(indicatorRegionCache, cacheKey, INDICATOR_REGION_TTL);
   if (cached) return cached;
+  const staleCached = getTimedCache(indicatorRegionCache, cacheKey, INDICATOR_REGION_TTL, { allowStale: true });
 
   try {
     const json = await fetchJsonWithRetry('https://data360api.worldbank.org/data360/data', {
@@ -53,6 +54,10 @@ async function fetchData360RegionIndicator(databaseId, indicatorId, fallbackFetc
     setTimedCache(indicatorRegionCache, cacheKey, data);
     return data;
   } catch (err) {
+    if (staleCached) {
+      console.warn(`Usando cache vencida de Data360 ${databaseId}/${indicatorId}: ${err.message}`);
+      return staleCached;
+    }
     if (!fallbackFetcher) throw err;
     console.warn(`Data360 fallback para ${indicatorId}: ${err.message}`);
     return fallbackFetcher();
