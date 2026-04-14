@@ -1,11 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-//const CACHE_ROOT = path.resolve(__dirname, '..', '..', '..', '.cache', 'server');
-
-const CACHE_ROOT = process.env.VERCEL
-  ? path.join('/tmp', '.cache', 'server')
-  : path.resolve(__dirname, '..', '..', '..', '.cache', 'server');
+const CACHE_ROOT = path.resolve(__dirname, '..', '..', '..', '.cache', 'server');
 
 function ensureCacheRoot() {
   fs.mkdirSync(CACHE_ROOT, { recursive: true });
